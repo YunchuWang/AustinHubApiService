@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: PASSBOOK-GATEWAY
+  datasource:
+    password: ok
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/austinhub
+    username: root
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: austinhub
+  devtools:
+    livereload:
+      enabled: true
+
+server:
+  port: 9001
+
