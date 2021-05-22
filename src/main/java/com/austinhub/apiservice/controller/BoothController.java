@@ -24,8 +24,8 @@ public class BoothController {
 
   @GetMapping
   public ResponseEntity<List<Booth>> findBoothsByCategory(
-      @Valid @NotNull @RequestParam Integer categoryRelationId) {
-    return ResponseEntity.ok().body(boothService.findByCategory(categoryRelationId));
+      @Valid @NotNull @RequestParam Integer categoryId) {
+    return ResponseEntity.ok().body(boothService.findByCategory(categoryId));
   }
 
   @PostMapping

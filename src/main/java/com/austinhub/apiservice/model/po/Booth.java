@@ -49,6 +49,6 @@ public class Booth implements Serializable {
 	private String description;
 
 	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "category_relation_id", nullable = false)
-	private CategoryRelation categoryRelation;
+	@JoinColumn(name = "category_id", nullable = false)
+	private Category category;
 }

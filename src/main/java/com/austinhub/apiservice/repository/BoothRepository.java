@@ -1,19 +1,19 @@
 package com.austinhub.apiservice.repository;
 
 import com.austinhub.apiservice.model.po.Booth;
-import com.austinhub.apiservice.model.po.CategoryRelation;
+import com.austinhub.apiservice.model.po.Category;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
 public interface BoothRepository extends JpaRepository<Booth, Integer> {
-  List<Booth> findAllByCategoryRelation(CategoryRelation categoryRelation);
 
-  @Override
-  <S extends Booth> S save(S s);
+    List<Booth> findAllByCategory(Category category);
 
-  @Override
-  void delete(Booth booth);
+    @Override
+    <S extends Booth> S save(S s);
+
+    @Override
+    void delete(Booth booth);
 }

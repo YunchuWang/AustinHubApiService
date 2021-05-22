@@ -2,7 +2,7 @@ package com.austinhub.apiservice.service;
 
 import com.austinhub.apiservice.model.dto.BoothRequest;
 import com.austinhub.apiservice.model.po.Booth;
-import com.austinhub.apiservice.model.po.CategoryRelation;
+import com.austinhub.apiservice.model.po.Category;
 import com.austinhub.apiservice.model.po.Resource;
 import com.austinhub.apiservice.repository.BoothRepository;
 import com.austinhub.apiservice.repository.ResourceRepository;
@@ -22,14 +22,13 @@ public class BoothService {
   private BoothRepository boothRepository;
   private ResourceRepository resourceRepository;
 
-  public List<Booth> findByCategory(int categoryRelationId) {
-    CategoryRelation categoryRelation = CategoryRelation.builder().id(categoryRelationId).build();
+  public List<Booth> findByCategory(int categoryId) {
+    Category category = Category.builder().id(categoryId).build();
 
-    return boothRepository.findAllByCategoryRelation(categoryRelation);
+    return boothRepository.findAllByCategory(category);
   }
 
   public Booth saveBooth(BoothRequest boothRequest) {
-    CategoryRelation categoryRelation = CategoryRelation.builder().id(boothRequest.getCategoryRelationId()).build();
     Resource resource = resourceRepository.findByName("booth");
     Booth booth =
         Booth.builder()
@@ -38,7 +37,7 @@ public class BoothService {
             .email(boothRequest.getEmail())
             .description(boothRequest.getDescription())
                 .resourceId(resource.getId())
-            .categoryRelation(categoryRelation)
+            .category(Category.builder().id(boothRequest.getCategoryRelationId()).build())
             .build();
 
     return boothRepository.save(booth);

@@ -2,22 +2,22 @@ package com.austinhub.apiservice.service;
 
 import com.austinhub.apiservice.model.po.Category;
 import com.austinhub.apiservice.repository.CategoryRepository;
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import java.util.List;
 
 @Service
 @Transactional
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 public class CategoryService {
 
-  @PersistenceContext private EntityManager entityManager;
-  private CategoryRepository categoryRepository;
+    @PersistenceContext
+    private EntityManager entityManager;
+    private CategoryRepository categoryRepository;
 
 //  @Transactional
 //  public List<CategoryRelationDto> findAllCategoryRelations() {
@@ -41,7 +41,7 @@ public class CategoryService {
 //        .on(qCategoryRelation.subcategoryId.eq(qSubcategory.id)).fetch();
 //  }
 
-  public List<Category> findAllCategories() {
-    return categoryRepository.findAll();
-  }
+    public List<Category> findAllCategories() {
+        return categoryRepository.findAll();
+    }
 }
