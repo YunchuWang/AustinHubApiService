@@ -26,6 +26,7 @@ public class AdsController {
 
     @GetMapping
     public ResponseEntity<List<Ads>> findAllAds() {
+        List<Ads> ads = adsService.findAllAds();
         return ResponseEntity.ok().body(adsService.findAllAds());
     }
 

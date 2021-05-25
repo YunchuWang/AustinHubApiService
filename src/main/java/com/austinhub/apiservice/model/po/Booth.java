@@ -30,7 +30,7 @@ public class Booth implements Serializable {
 	@Column(name = "id")
 	private Integer id;
 
-   	@Column(name = "resource_id", nullable = false)
+   	@Column(name = "resourceId", nullable = false)
 	private Integer resourceId;
 
 	@NotBlank
@@ -49,6 +49,6 @@ public class Booth implements Serializable {
 	private String description;
 
 	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "category_id", nullable = false)
+	@JoinColumn(name = "categoryId", nullable = false)
 	private Category category;
 }

@@ -1,5 +1,6 @@
 package com.austinhub.apiservice.service;
 
+import com.austinhub.apiservice.model.CategoryType;
 import com.austinhub.apiservice.model.po.Category;
 import com.austinhub.apiservice.repository.CategoryRepository;
 import java.util.List;
@@ -41,7 +42,7 @@ public class CategoryService {
 //        .on(qCategoryRelation.subcategoryId.eq(qSubcategory.id)).fetch();
 //  }
 
-    public List<Category> findAllCategories() {
-        return categoryRepository.findAll();
+    public List<Category> findCategoriesByType(CategoryType categoryType) {
+        return categoryRepository.findByCategoryType(categoryType);
     }
 }

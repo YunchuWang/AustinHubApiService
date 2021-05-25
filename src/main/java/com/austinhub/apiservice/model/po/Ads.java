@@ -30,7 +30,7 @@ public class Ads {
     @Column(name = "id")
     private long id;
 
-    @Column(name = "resource_id", nullable = false)
+    @Column(name = "resourceId", nullable = false)
     private long resourceId;
 
     @NotBlank
@@ -49,15 +49,15 @@ public class Ads {
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "categoryId")
     private Category category;
 
-    @Column(name = "web_link")
+    @Column(name = "webLink")
     private String webLink;
 
-    @Column(name = "image_link")
+    @Column(name = "imageLink")
     private String imageLink;
 
-    @Column(name = "created_timestamp")
+    @Column(name = "createdTimestamp")
     private Timestamp createdTimestamp;
 }

@@ -11,10 +11,12 @@ spring:
       hibernate:
         format_sql: true
         default_schema: austinhub
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
   devtools:
     livereload:
       enabled: true
 
 server:
   port: 9001
-

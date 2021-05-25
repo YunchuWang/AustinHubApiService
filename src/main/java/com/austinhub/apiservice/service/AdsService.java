@@ -19,7 +19,7 @@ public class AdsService {
     private AdsRepository adsRepository;
 
     public List<Ads> findAllAds() {
-        return adsRepository.findAll(Sort.by(Direction.ASC, "created_timestamp"));
+        return adsRepository.findAll(Sort.by(Direction.ASC, "createdTimestamp"));
     }
 
     public void saveAds(List<Ads> ads) {
