@@ -3,16 +3,14 @@ package com.austinhub.apiservice.service;
 import com.austinhub.apiservice.model.dto.BoothRequest;
 import com.austinhub.apiservice.model.po.Booth;
 import com.austinhub.apiservice.model.po.Category;
-import com.austinhub.apiservice.model.po.Resource;
 import com.austinhub.apiservice.repository.BoothRepository;
-import com.austinhub.apiservice.repository.ResourceRepository;
+import com.austinhub.apiservice.repository.ResourceTypeRepository;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @Transactional
@@ -20,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 public class BoothService {
   private BoothRepository boothRepository;
-  private ResourceRepository resourceRepository;
+  private ResourceTypeRepository resourceRepository;
 
   public List<Booth> findByCategory(int categoryId) {
     Category category = Category.builder().id(categoryId).build();
@@ -29,17 +27,17 @@ public class BoothService {
   }
 
   public Booth saveBooth(BoothRequest boothRequest) {
-    Resource resource = resourceRepository.findByName("booth");
-    Booth booth =
-        Booth.builder()
-            .name(boothRequest.getName())
-            .phone(boothRequest.getPhone())
-            .email(boothRequest.getEmail())
-            .description(boothRequest.getDescription())
-                .resourceId(resource.getId())
-            .category(Category.builder().id(boothRequest.getCategoryRelationId()).build())
-            .build();
-
-    return boothRepository.save(booth);
+//    Resource resource = resourceRepository.findByName("booth");
+//    Booth booth =
+//        Booth.builder()
+//            .name(boothRequest.getName())
+//            .phone(boothRequest.getPhone())
+//            .email(boothRequest.getEmail())
+//            .description(boothRequest.getDescription())
+//                .resourceId(resource.getId())
+//            .category(Category.builder().id(boothRequest.getCategoryRelationId()).build())
+//            .build();
+    return null;
+//    return boothRepository.save(booth);
   }
 }

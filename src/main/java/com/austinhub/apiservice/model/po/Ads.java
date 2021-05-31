@@ -2,7 +2,6 @@ package com.austinhub.apiservice.model.po;
 
 import com.austinhub.apiservice.validator.ExtendedEmailValidator;
 import com.austinhub.apiservice.validator.Mobile;
-import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -37,6 +36,11 @@ public class Ads {
     @Column(name = "name")
     private String name;
 
+    @NotBlank
+    @Column(name = "address")
+    private String address;
+
+
     @Column(name = "phone")
     @Mobile
     private String phone;
@@ -57,7 +61,4 @@ public class Ads {
 
     @Column(name = "imageLink")
     private String imageLink;
-
-    @Column(name = "createdTimestamp")
-    private Timestamp createdTimestamp;
 }

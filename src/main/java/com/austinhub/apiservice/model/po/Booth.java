@@ -37,6 +37,10 @@ public class Booth implements Serializable {
    	@Column(name = "name" )
 	private String name;
 
+	@NotBlank
+	@Column(name = "address" )
+	private String address;
+
    	@Column(name = "phone" )
 	@Mobile
 	private String phone;
