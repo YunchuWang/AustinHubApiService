@@ -1,7 +1,8 @@
 package com.austinhub.apiservice.service;
 
-import com.austinhub.apiservice.model.po.Ads;
-import com.austinhub.apiservice.repository.AdsRepository;
+import com.austinhub.apiservice.model.po.Category;
+import com.austinhub.apiservice.model.po.Job;
+import com.austinhub.apiservice.repository.JobRepository;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -13,14 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 @NoArgsConstructor
-public class AdsService {
-    private AdsRepository adsRepository;
+public class JobsService {
+    private JobRepository jobRepository;
 
-    public List<Ads> findAllAds() {
-        return adsRepository.findAll();
-    }
+    public List<Job> findByCategory(int categoryId) {
+        Category category = Category.builder().id(categoryId).build();
 
-    public void saveAds(List<Ads> ads) {
-        adsRepository.saveAll(ads);
+        return jobRepository.findByCategory(category);
     }
 }

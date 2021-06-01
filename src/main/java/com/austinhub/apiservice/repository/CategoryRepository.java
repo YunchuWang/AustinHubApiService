@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CategoryRepository extends BaseRepository<Category, Integer> {
     public List<Category> findByCategoryType(CategoryType categoryType);
+    public Category findByNameAndCategoryType(String name, CategoryType categoryType);
 }

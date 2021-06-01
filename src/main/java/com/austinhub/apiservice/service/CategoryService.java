@@ -6,6 +6,8 @@ import com.austinhub.apiservice.repository.CategoryRepository;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,5 +46,9 @@ public class CategoryService {
 
     public List<Category> findCategoriesByType(CategoryType categoryType) {
         return categoryRepository.findByCategoryType(categoryType);
+    }
+
+    public Category findCategory(String name, @Valid @NotNull CategoryType type) {
+        return categoryRepository.findByNameAndCategoryType(name, type);
     }
 }
