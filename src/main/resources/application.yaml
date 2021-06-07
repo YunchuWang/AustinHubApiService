@@ -3,7 +3,7 @@ spring:
     name: PASSBOOK-GATEWAY
   datasource:
     password: ok
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/austinhub
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/austinhub?serverTimezone=America/Chicago&useSSL=false
     username: root
   jpa:
     show-sql: true
