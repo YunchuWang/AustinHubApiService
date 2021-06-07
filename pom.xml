@@ -76,6 +76,11 @@
             <artifactId>querydsl-jpa</artifactId>
             <version>4.2.2</version>
         </dependency>
+        <dependency>
+            <artifactId>braintree-java</artifactId>
+            <groupId>com.braintreepayments.gateway</groupId>
+            <version>3.10.0</version>
+        </dependency>
     </dependencies>
 
     <build>
