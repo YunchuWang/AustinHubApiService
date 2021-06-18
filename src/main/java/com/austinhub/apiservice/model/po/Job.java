@@ -1,5 +1,6 @@
 package com.austinhub.apiservice.model.po;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,12 +37,14 @@ public class Job {
     @Column(name = "contact")
     private String contact;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "categoryId", nullable = false)
     private Category category;
 
-    @Column(name = "resourceId")
-    private Integer resourceId;
+    @OneToOne(cascade = {CascadeType.REMOVE, CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @JoinColumn(name = "resourceId", referencedColumnName = "id")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private Resource resource;
 
     @Column(name = "companyLink")
     private String companyLink;

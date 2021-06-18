@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface MembershipTypeRepository extends JpaRepository<MembershipType, Integer> {
 
+    MembershipType findMembershipTypeByName(String name);
     @Override
     List<MembershipType> findAll();
 

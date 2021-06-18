@@ -2,6 +2,7 @@ package com.austinhub.apiservice.model.po;
 
 import com.austinhub.apiservice.validator.ExtendedEmailValidator;
 import com.austinhub.apiservice.validator.Mobile;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,8 +31,10 @@ public class Booth implements Serializable {
 	@Column(name = "id")
 	private Integer id;
 
-   	@Column(name = "resourceId", nullable = false)
-	private Integer resourceId;
+	@OneToOne(cascade = {CascadeType.REMOVE, CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+	@JoinColumn(name = "resourceId", referencedColumnName = "id")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	private Resource resource;
 
 	@NotBlank
    	@Column(name = "name" )
@@ -52,7 +55,10 @@ public class Booth implements Serializable {
    	@Column(name = "description" )
 	private String description;
 
-	@ManyToOne(cascade = CascadeType.ALL)
+	@Column(name = "webLink" )
+	private String webLink;
+
+	@ManyToOne
 	@JoinColumn(name = "categoryId", nullable = false)
 	private Category category;
 }

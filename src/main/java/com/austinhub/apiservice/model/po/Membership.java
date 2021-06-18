@@ -10,11 +10,11 @@ import org.hibernate.annotations.CreationTimestamp;
 
 @Data
 @Entity
-@Table(name = "resource")
+@Table(name = "membership")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Resource {
+public class Membership {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -24,8 +24,12 @@ public class Resource {
     @JoinColumn(name = "accountId")
     private Account account;
 
-    @Column(name = "membershipId")
-    private Integer membershipId;
+    @OneToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "membershipTypeId", referencedColumnName = "id")
+    private MembershipType membershipType;
+
+    @Column(name = "autoSubscribed")
+    private Boolean autoSubscribed;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "expirationTimestamp")
@@ -38,8 +42,4 @@ public class Resource {
 
     @Column(name = "orderId")
     private Integer orderId;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "resourceTypeId")
-    private ResourceType resourceType;
 }

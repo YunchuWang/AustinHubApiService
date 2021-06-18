@@ -1,6 +1,6 @@
 package com.austinhub.apiservice.controller;
 
-import com.austinhub.apiservice.model.dto.MembershipTypeDto;
+import com.austinhub.apiservice.model.dto.MembershipTypeDTO;
 import com.austinhub.apiservice.service.MembershipService;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +21,7 @@ public class MembershipController {
     }
 
     @GetMapping("/types")
-    public ResponseEntity<List<MembershipTypeDto>> findAllMembershipTypes() {
+    public ResponseEntity<List<MembershipTypeDTO>> findAllMembershipTypes() {
         return ResponseEntity.ok().body(membershipService.findAll());
     }
 }

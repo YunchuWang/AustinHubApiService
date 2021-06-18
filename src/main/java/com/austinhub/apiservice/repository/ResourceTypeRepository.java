@@ -8,4 +8,6 @@ public interface ResourceTypeRepository extends JpaRepository<ResourceType, Inte
 
     @Override
     List<ResourceType> findAll();
+
+    ResourceType findResourceTypeByTableName(String tableName);
 }

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CategoryRelationDto {
+public class CategoryRelationDTO {
     private Integer id;
     private Integer categoryId;
     private String categoryName;

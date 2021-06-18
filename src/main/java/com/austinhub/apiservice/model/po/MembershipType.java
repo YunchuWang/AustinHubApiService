@@ -1,6 +1,6 @@
 package com.austinhub.apiservice.model.po;
 
-import com.austinhub.apiservice.model.dto.MembershipTypeDto;
+import com.austinhub.apiservice.model.dto.MembershipTypeDTO;
 import com.austinhub.apiservice.model.dto.ResourceLimit;
 import java.util.List;
 import javax.persistence.Column;
@@ -42,8 +42,8 @@ public class MembershipType {
     @Column(name = "yearlyPrice")
     private Double yearlyPrice;
 
-    public MembershipTypeDto toDto(List<ResourceLimit> resourceLimits) {
-        return MembershipTypeDto.builder()
+    public MembershipTypeDTO toDto(List<ResourceLimit> resourceLimits) {
+        return MembershipTypeDTO.builder()
                 .name(name)
                 .description(description)
                 .resourceLimits(resourceLimits)

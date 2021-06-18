@@ -25,7 +25,7 @@ public class CategoryController {
   }
 
   @GetMapping
-  public ResponseEntity<List<Category>> findAllCategories(@Valid @NotNull @RequestParam(value = "categoryType") CategoryType type) {
+  public ResponseEntity<List<Category>> findAllCategories(@Valid @NotNull @RequestParam(value = "type") CategoryType type) {
     return ResponseEntity.ok().body(categoryService.findCategoriesByType(type));
   }
 }

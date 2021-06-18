@@ -1,26 +1,23 @@
 package com.austinhub.apiservice.model.dto;
 
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
+@ToString(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MembershipTypeDto {
-
+public class JobDTO extends OrderItemDTO {
     private String name;
-
     private String description;
-
-    private List<ResourceLimit> resourceLimits;
-
-    private Double monthlyPrice;
-
-    private Double quarterlyPrice;
-
-    private Double yearlyPrice;
+    private String salary;
+    private String phone;
+    private String address;
+    private String contact;
+    private String categoryName;
+    private String companyLink;
 }

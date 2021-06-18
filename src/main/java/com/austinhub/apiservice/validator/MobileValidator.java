@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 public class MobileValidator implements ConstraintValidator<Mobile, String> {
 
 	public MobileValidator() {
-		// TODO Auto-generated constructor stub
 	}
 
 	private boolean required = false;
@@ -23,7 +22,7 @@ public class MobileValidator implements ConstraintValidator<Mobile, String> {
 
 	@Override
 	public boolean isValid(String phone, ConstraintValidatorContext constraintValidatorContext) {
-		Pattern mobile_pattern = Pattern.compile("1\\d{10}");
+		Pattern mobile_pattern = Pattern.compile("[1]?\\d{10}");
 		// System.out.println(phone);
 		// 是否为手机号的实现
 		if (required) {

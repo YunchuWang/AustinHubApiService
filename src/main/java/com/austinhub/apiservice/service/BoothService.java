@@ -1,10 +1,21 @@
 package com.austinhub.apiservice.service;
 
+import com.austinhub.apiservice.model.CategoryType;
+import com.austinhub.apiservice.model.dto.AdsDTO;
+import com.austinhub.apiservice.model.dto.BoothDTO;
 import com.austinhub.apiservice.model.dto.BoothRequest;
+import com.austinhub.apiservice.model.dto.OrderItemDTO;
+import com.austinhub.apiservice.model.po.Account;
+import com.austinhub.apiservice.model.po.Ads;
 import com.austinhub.apiservice.model.po.Booth;
 import com.austinhub.apiservice.model.po.Category;
+import com.austinhub.apiservice.model.po.Resource;
+import com.austinhub.apiservice.model.po.ResourceType;
 import com.austinhub.apiservice.repository.BoothRepository;
+import com.austinhub.apiservice.repository.CategoryRepository;
 import com.austinhub.apiservice.repository.ResourceTypeRepository;
+import com.austinhub.apiservice.utils.ApplicationUtils;
+import java.util.Date;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -16,18 +27,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 @NoArgsConstructor
-public class BoothService {
-  private BoothRepository boothRepository;
-  private ResourceTypeRepository resourceRepository;
+public class BoothService implements IOrderItemSaveService {
 
-  public List<Booth> findByCategory(int categoryId) {
-    Category category = Category.builder().id(categoryId).build();
+    private BoothRepository boothRepository;
+    private CategoryRepository categoryRepository;
+    private ResourceTypeRepository resourceTypeRepository;
 
-    return boothRepository.findAllByCategory(category);
-  }
+    public List<Booth> findByCategory(int categoryId) {
+        Category category = Category.builder().id(categoryId).build();
 
-  public Booth saveBooth(BoothRequest boothRequest) {
-//    Resource resource = resourceRepository.findByName("booth");
+        return boothRepository.findAllByCategory(category);
+    }
+
+    public Booth saveBooth(BoothRequest boothRequest) {
 //    Booth booth =
 //        Booth.builder()
 //            .name(boothRequest.getName())
@@ -37,7 +49,41 @@ public class BoothService {
 //                .resourceId(resource.getId())
 //            .category(Category.builder().id(boothRequest.getCategoryRelationId()).build())
 //            .build();
-    return null;
 //    return boothRepository.save(booth);
-  }
+        return null;
+    }
+
+    @Override
+    public void save(OrderItemDTO orderItemDTO, Account account, Date createdTimestamp,
+            Integer orderId, Integer membershipId, String resourceTypeName) {
+        final BoothDTO boothDTO = (BoothDTO) orderItemDTO;
+        final ResourceType resourceType = resourceTypeRepository
+                .findResourceTypeByTableName(resourceTypeName);
+        final Resource resource = Resource.builder()
+                .account(account)
+                .createdTimestamp(createdTimestamp)
+                .expirationTimestamp(
+                        ApplicationUtils
+                                .calculateOrderItemExpirationTimestamp(boothDTO.getPricingPlan(),
+                                        createdTimestamp))
+                .orderId(orderId)
+                .resourceType(resourceType)
+                .build();
+        final Category category = categoryRepository
+                .findByNameAndCategoryType(boothDTO.getCategoryName(),
+                        CategoryType.RESC);
+        System.out.println(category.toString());
+        final Booth booth = Booth.builder()
+                .resource(resource)
+                .name(boothDTO.getName())
+                .phone(boothDTO.getPhone())
+                .email(boothDTO.getEmail())
+                .description(boothDTO.getDescription())
+                .category(category)
+                .webLink(boothDTO.getWebLink())
+                .address(boothDTO.getAddress())
+                .build();
+
+        boothRepository.save(booth);
+    }
 }

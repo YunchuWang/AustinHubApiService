@@ -1,9 +1,10 @@
 package com.austinhub.apiservice.repository;
 
-import com.austinhub.apiservice.model.po.Resource;
+import com.austinhub.apiservice.model.po.Membership;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ResourceRepository extends JpaRepository<Resource, Integer> {
+public interface MembershipRepository extends JpaRepository<Membership, Integer> {
+
 }
