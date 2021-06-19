@@ -18,6 +18,9 @@ spring:
     livereload:
       enabled: true
 
+support:
+  email: yunchuwang6@gmail.com
+  
 server:
   port: 9001
 

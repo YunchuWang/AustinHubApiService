@@ -23,7 +23,6 @@ public class MobileValidator implements ConstraintValidator<Mobile, String> {
 	@Override
 	public boolean isValid(String phone, ConstraintValidatorContext constraintValidatorContext) {
 		Pattern mobile_pattern = Pattern.compile("[1]?\\d{10}");
-		// System.out.println(phone);
 		// 是否为手机号的实现
 		if (required) {
 			if (StringUtils.isEmpty(phone)) {

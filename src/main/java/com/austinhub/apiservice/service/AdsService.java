@@ -56,7 +56,6 @@ public class AdsService implements IOrderItemSaveService {
         final Category category = categoryRepository
                 .findByNameAndCategoryType(adsDTO.getCategoryName(),
                         CategoryType.RESC);
-        System.out.println(category.toString());
         final Ads ads = Ads.builder()
                 .resource(resource)
                 .name(adsDTO.getName())

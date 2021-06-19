@@ -3,10 +3,11 @@ package com.austinhub.apiservice.controller;
 import com.austinhub.apiservice.model.dto.MakePaymentDTO;
 import com.austinhub.apiservice.model.enums.OrderStatus;
 import com.austinhub.apiservice.model.po.Order;
+import com.austinhub.apiservice.repository.AccountRepository;
+import com.austinhub.apiservice.service.MailService;
 import com.austinhub.apiservice.service.OrderService;
 import com.austinhub.apiservice.service.TransactionService;
 import com.austinhub.apiservice.utils.ApplicationUtils;
-import com.austinhub.apiservice.utils.GsonUtils;
 import com.braintreegateway.BraintreeGateway;
 import com.braintreegateway.ClientTokenRequest;
 import com.braintreegateway.Result;
@@ -20,7 +21,11 @@ import java.util.Map;
 import java.util.Objects;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,20 +35,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Validated
+@Transactional
+@AllArgsConstructor(onConstructor = @__(@Autowired))
+@NoArgsConstructor
 @RequestMapping("/payment")
 public class PaymentController {
 
     private BraintreeGateway braintreeGateway;
     private OrderService orderService;
+    private MailService mailService;
     private TransactionService transactionService;
-
-    public PaymentController(BraintreeGateway braintreeGateway,
-            OrderService orderService,
-            TransactionService transactionService) {
-        this.braintreeGateway = braintreeGateway;
-        this.orderService = orderService;
-        this.transactionService = transactionService;
-    }
+    private AccountRepository accountRepository;
+    private KafkaTemplate kafkaTemplate;
 
 
     @PostMapping("/make")
@@ -51,7 +54,6 @@ public class PaymentController {
     public ResponseEntity<Map<String, String>> makePayment(
             @Valid @NotNull @RequestBody MakePaymentDTO makePaymentDto) {
         // save order to db: OPEN
-        System.out.println(makePaymentDto.toString());
         Order createdOrder = orderService.saveOrder(makePaymentDto.getOrderDto());
         // make payment call
         TransactionRequest request = new TransactionRequest()
@@ -63,7 +65,6 @@ public class PaymentController {
                 .done();
         Result<Transaction> transaction = braintreeGateway.transaction().sale(request);
 
-        System.out.println(GsonUtils.getGson().toJson(transaction));
         // persistent transaction
         Objects.requireNonNull(transaction.getTarget(), "Transaction is empty!");
         final Timestamp createdTimestamp = new Timestamp(
@@ -97,6 +98,10 @@ public class PaymentController {
 
         if (OrderStatus.COMPLETED.equals(createdOrder.getStatus())) {
             // TODO: send order confirm email
+            final String accountEmail = createdOrder.getAccount().getEmail();
+            System.out.println("Email : " + accountEmail);
+            kafkaTemplate.send("email", mailService.constructOrderConfirmationEmail(accountEmail,
+                    createdOrder.getOrderNumber()));
             return ResponseEntity.ok(ImmutableMap
                     .of("message", "Order placed!", "orderNo", createdOrder.getOrderNumber()));
         } else {

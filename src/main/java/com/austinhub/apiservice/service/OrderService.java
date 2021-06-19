@@ -42,10 +42,7 @@ public class OrderService {
                 .price(orderDto.getPrice())
                 .status(OrderStatus.REQUESTED)
                 .build();
-        System.out.println(order.toString());
         final Order createdOrder = orderRepository.save(order);
-        System.out.println(createdOrder.toString());
-        System.out.println(orderDto.toString());
         final Date orderCreatedTimestamp = createdOrder.getCreatedTimestamp();
         final int orderId = createdOrder.getId();
 
