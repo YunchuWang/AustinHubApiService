@@ -102,8 +102,12 @@ public class PaymentController {
             System.out.println("Email : " + accountEmail);
             kafkaTemplate.send("email", mailService.constructOrderConfirmationEmail(accountEmail,
                     createdOrder.getOrderNumber()));
-            return ResponseEntity.ok(ImmutableMap
-                    .of("message", "Order placed!", "orderNo", createdOrder.getOrderNumber()));
+            return ResponseEntity.ok(
+                    ImmutableMap.of(
+                            "message", "Order placed!",
+                            "orderNo", createdOrder.getOrderNumber(),
+                            "customerId", transaction.getTarget().getCustomer().getId()
+                    ));
         } else {
             // specify err
             return ResponseEntity.badRequest()
