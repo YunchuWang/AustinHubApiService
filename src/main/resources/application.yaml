@@ -26,3 +26,9 @@ server:
 
 hibernate:
   globally_quoted_identifiers: true
+
+#logging:
+#  level:
+#    org:
+#      hibernate:
+#        type: trace

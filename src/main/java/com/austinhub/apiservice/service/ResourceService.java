@@ -1,6 +1,7 @@
 package com.austinhub.apiservice.service;
 
 import com.austinhub.apiservice.model.po.ResourceType;
+import com.austinhub.apiservice.repository.ResourceRepository;
 import com.austinhub.apiservice.repository.ResourceTypeRepository;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -15,8 +16,13 @@ import org.springframework.transaction.annotation.Transactional;
 @NoArgsConstructor
 public class ResourceService {
     private ResourceTypeRepository resourceTypeRepository;
+    private ResourceRepository resourceRepository;
 
     public List<ResourceType> findAllResourceTypes() {
         return resourceTypeRepository.findAll();
+    }
+
+    public void updateIsArchived(Integer resourceId, Boolean isArchived) {
+        resourceRepository.updateIsArchived(resourceId, isArchived);
     }
 }

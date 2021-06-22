@@ -1,8 +1,10 @@
 package com.austinhub.apiservice.service;
 
 import com.austinhub.apiservice.model.CategoryType;
-import com.austinhub.apiservice.model.dto.AdsDTO;
+import com.austinhub.apiservice.model.dto.CreateAdsDTO;
+import com.austinhub.apiservice.model.dto.MyAdsDTO;
 import com.austinhub.apiservice.model.dto.OrderItemDTO;
+import com.austinhub.apiservice.model.dto.UpdateAdsRequest;
 import com.austinhub.apiservice.model.po.Account;
 import com.austinhub.apiservice.model.po.Ads;
 import com.austinhub.apiservice.model.po.Category;
@@ -34,38 +36,73 @@ public class AdsService implements IOrderItemSaveService {
         return adsRepository.findAll();
     }
 
+    public List<MyAdsDTO> findOwnsAds(String accountName, Boolean isArchived) {
+        return adsRepository.findByAccountNameAndArchived(accountName, isArchived);
+    }
+
     public void saveAds(List<Ads> ads) {
         adsRepository.saveAll(ads);
+    }
+
+    public void updateAds(UpdateAdsRequest updates) {
+        // Get existing ads
+        Ads ads = adsRepository.getOne((updates.getId()));
+        if (ads == null) {
+            throw new RuntimeException("Ads does not exist");
+        }
+
+        Category newCategory =
+                categoryRepository.findByNameAndCategoryType(updates.getCategoryName(),
+                        CategoryType.RESC);
+
+        if (newCategory == null) {
+            throw new RuntimeException(
+                    String.format("Category %s does not exist", updates.getCategoryName()));
+        }
+        
+        ads.setName(updates.getName());
+        ads.setAddress(updates.getAddress());
+        ads.setPhone(updates.getPhone());
+        ads.setEmail(updates.getEmail());
+        ads.setDescription(updates.getDescription());
+        ads.setCategory(newCategory);
+        ads.setWebLink(updates.getWebLink());
+        ads.setImageLink(updates.getImageLink());
+        
+        // Update ads
+        adsRepository.save(ads);
     }
 
     @Override
     public void save(OrderItemDTO orderItemDTO, Account account,
             Date createdTimestamp, Integer orderId, Integer membershipId, String resourceTypeName) {
-        final AdsDTO adsDTO = (AdsDTO) orderItemDTO;
-        final ResourceType resourceType = resourceTypeRepository.findResourceTypeByTableName(resourceTypeName);
+        final CreateAdsDTO createAdsDTO = (CreateAdsDTO) orderItemDTO;
+        final ResourceType resourceType = resourceTypeRepository
+                .findResourceTypeByTableName(resourceTypeName);
         final Resource resource = Resource.builder()
                 .account(account)
                 .createdTimestamp(createdTimestamp)
                 .expirationTimestamp(
                         ApplicationUtils
-                                .calculateOrderItemExpirationTimestamp(adsDTO.getPricingPlan(),
+                                .calculateOrderItemExpirationTimestamp(
+                                        createAdsDTO.getPricingPlan(),
                                         createdTimestamp))
                 .orderId(orderId)
                 .resourceType(resourceType)
                 .build();
         final Category category = categoryRepository
-                .findByNameAndCategoryType(adsDTO.getCategoryName(),
+                .findByNameAndCategoryType(createAdsDTO.getCategoryName(),
                         CategoryType.RESC);
         final Ads ads = Ads.builder()
                 .resource(resource)
-                .name(adsDTO.getName())
-                .phone(adsDTO.getPhone())
-                .email(adsDTO.getEmail())
-                .description(adsDTO.getDescription())
+                .name(createAdsDTO.getName())
+                .phone(createAdsDTO.getPhone())
+                .email(createAdsDTO.getEmail())
+                .description(createAdsDTO.getDescription())
                 .category(category)
-                .webLink(adsDTO.getWebLink())
-                .imageLink(adsDTO.getImageUploaded())
-                .address(adsDTO.getAddress())
+                .webLink(createAdsDTO.getWebLink())
+                .imageLink(createAdsDTO.getImageUploaded())
+                .address(createAdsDTO.getAddress())
                 .build();
 
         adsRepository.save(ads);

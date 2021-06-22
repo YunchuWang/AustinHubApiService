@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AdsRequest {
+public class SaveAdsRequest {
     @NotNull
     private List<Ads> ads;
 }

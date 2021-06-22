@@ -13,7 +13,7 @@ import lombok.ToString;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MembershipDTO extends OrderItemDTO {
+public class CreateMembershipDTO extends OrderItemDTO {
     private boolean autoSubscribed;
     private MembershipType membershipType;
     private List<OrderItemDTO> resourceItems;

@@ -39,6 +39,9 @@ public class Resource {
     @Column(name = "orderId")
     private Integer orderId;
 
+    @Column(name = "isArchived")
+    private Boolean isArchived;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "resourceTypeId")
     private ResourceType resourceType;

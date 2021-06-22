@@ -1,9 +1,13 @@
 package com.austinhub.apiservice.service;
 
 import com.austinhub.apiservice.model.CategoryType;
-import com.austinhub.apiservice.model.dto.JobDTO;
+import com.austinhub.apiservice.model.dto.CreateJobDTO;
+import com.austinhub.apiservice.model.dto.MyJobDTO;
 import com.austinhub.apiservice.model.dto.OrderItemDTO;
+import com.austinhub.apiservice.model.dto.UpdateAdsRequest;
+import com.austinhub.apiservice.model.dto.UpdateJobRequest;
 import com.austinhub.apiservice.model.po.Account;
+import com.austinhub.apiservice.model.po.Ads;
 import com.austinhub.apiservice.model.po.Category;
 import com.austinhub.apiservice.model.po.Job;
 import com.austinhub.apiservice.model.po.Resource;
@@ -39,7 +43,7 @@ public class JobsService implements IOrderItemSaveService {
     @Override
     public void save(OrderItemDTO orderItemDTO, Account account, Date createdTimestamp,
             Integer orderId, Integer membershipId, String resourceTypeName) {
-        final JobDTO jobDTO = (JobDTO) orderItemDTO;
+        final CreateJobDTO createJobDTO = (CreateJobDTO) orderItemDTO;
         final ResourceType resourceType = resourceTypeRepository
                 .findResourceTypeByTableName(resourceTypeName);
         final Resource resource = Resource.builder()
@@ -47,26 +51,60 @@ public class JobsService implements IOrderItemSaveService {
                 .createdTimestamp(createdTimestamp)
                 .expirationTimestamp(
                         ApplicationUtils
-                                .calculateOrderItemExpirationTimestamp(jobDTO.getPricingPlan(),
+                                .calculateOrderItemExpirationTimestamp(createJobDTO.getPricingPlan(),
                                         createdTimestamp))
                 .orderId(orderId)
                 .resourceType(resourceType)
                 .build();
         final Category category = categoryRepository
-                .findByNameAndCategoryType(jobDTO.getCategoryName(),
+                .findByNameAndCategoryType(createJobDTO.getCategoryName(),
                         CategoryType.RESC);
         final Job job = Job.builder()
                 .resource(resource)
-                .name(jobDTO.getName())
-                .description(jobDTO.getDescription())
-                .salary(jobDTO.getSalary())
-                .phone(jobDTO.getPhone())
-                .address(jobDTO.getAddress())
-                .contact(jobDTO.getContact())
+                .name(createJobDTO.getName())
+                .description(createJobDTO.getDescription())
+                .salary(createJobDTO.getSalary())
+                .phone(createJobDTO.getPhone())
+                .address(createJobDTO.getAddress())
+                .contact(createJobDTO.getContact())
                 .category(category)
-                .companyLink(jobDTO.getCompanyLink())
+                .companyLink(createJobDTO.getCompanyLink())
                 .build();
 
+        jobRepository.save(job);
+    }
+
+    public List<MyJobDTO> findOwnsJobs(String accountName, Boolean isArchived) {
+        return jobRepository.findByAccountNameAndArchived(accountName, isArchived);
+    }
+
+    public void updateJob(UpdateJobRequest updates) {
+        // Get existing ads
+        Job job = jobRepository.getOne((updates.getId()));
+
+        if (job == null) {
+            throw new RuntimeException("Job does not exist");
+        }
+
+        Category newCategory =
+                categoryRepository.findByNameAndCategoryType(updates.getCategoryName(),
+                        CategoryType.RESC);
+
+        if (newCategory == null) {
+            throw new RuntimeException(
+                    String.format("Category %s does not exist", updates.getCategoryName()));
+        }
+
+        job.setName(updates.getName());
+        job.setDescription(updates.getDescription());
+        job.setSalary(updates.getSalary());
+        job.setPhone(updates.getPhone());
+        job.setAddress(updates.getAddress());
+        job.setContact(updates.getContact());
+        job.setCategory(newCategory);
+        job.setCompanyLink(updates.getCompanyLink());
+        
+        // Update ads
         jobRepository.save(job);
     }
 }

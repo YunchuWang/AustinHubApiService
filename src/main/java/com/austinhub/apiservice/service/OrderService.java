@@ -1,9 +1,9 @@
 package com.austinhub.apiservice.service;
 
-import com.austinhub.apiservice.model.dto.AdsDTO;
-import com.austinhub.apiservice.model.dto.BoothDTO;
-import com.austinhub.apiservice.model.dto.JobDTO;
-import com.austinhub.apiservice.model.dto.MembershipDTO;
+import com.austinhub.apiservice.model.dto.CreateAdsDTO;
+import com.austinhub.apiservice.model.dto.CreateBoothDTO;
+import com.austinhub.apiservice.model.dto.CreateJobDTO;
+import com.austinhub.apiservice.model.dto.CreateMembershipDTO;
 import com.austinhub.apiservice.model.dto.OrderDTO;
 import com.austinhub.apiservice.model.dto.OrderItemDTO;
 import com.austinhub.apiservice.model.enums.OrderStatus;
@@ -18,7 +18,6 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor(onConstructor = @__(@Autowired))
@@ -62,13 +61,13 @@ public class OrderService {
     }
 
     public IOrderItemSaveService getOrderItemSaveService(OrderItemDTO orderItemDTO) {
-        if (orderItemDTO instanceof AdsDTO) {
+        if (orderItemDTO instanceof CreateAdsDTO) {
             return adsService;
-        } else if (orderItemDTO instanceof BoothDTO) {
+        } else if (orderItemDTO instanceof CreateBoothDTO) {
             return boothService;
-        } else if (orderItemDTO instanceof JobDTO) {
+        } else if (orderItemDTO instanceof CreateJobDTO) {
             return jobsService;
-        } else if (orderItemDTO instanceof MembershipDTO) {
+        } else if (orderItemDTO instanceof CreateMembershipDTO) {
             return membershipService;
         }
         throw new RuntimeException("Invalid order item type!");

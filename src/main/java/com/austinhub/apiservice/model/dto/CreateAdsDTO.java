@@ -11,13 +11,15 @@ import lombok.ToString;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class JobDTO extends OrderItemDTO {
+public class CreateAdsDTO extends OrderItemDTO {
     private String name;
     private String description;
-    private String salary;
+    private Integer salary;
     private String phone;
     private String address;
+    private String email;
     private String contact;
     private String categoryName;
-    private String companyLink;
+    private String webLink;
+    private String imageUploaded;
 }
