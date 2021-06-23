@@ -6,16 +6,28 @@ import com.austinhub.apiservice.model.dto.CreateJobDTO;
 import com.austinhub.apiservice.model.dto.CreateMembershipDTO;
 import com.austinhub.apiservice.model.dto.OrderDTO;
 import com.austinhub.apiservice.model.dto.OrderItemDTO;
+import com.austinhub.apiservice.model.dto.OwnedOrderDTO;
 import com.austinhub.apiservice.model.enums.OrderStatus;
 import com.austinhub.apiservice.model.po.Account;
 import com.austinhub.apiservice.model.po.Order;
 import com.austinhub.apiservice.repository.AccountRepository;
 import com.austinhub.apiservice.repository.OrderRepository;
+import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+import javax.persistence.Column;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -71,5 +83,13 @@ public class OrderService {
             return membershipService;
         }
         throw new RuntimeException("Invalid order item type!");
+    }
+    
+    public List<Order> findOwnedOrders(String accountName) {
+        Account account = accountRepository.findByUsername(accountName);
+        if (account == null) {
+            throw new RuntimeException(String.format("Account %s does not exist", accountName));
+        }
+        return orderRepository.findByAccountId(account.getId());
     }
 }
