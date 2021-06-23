@@ -2,18 +2,15 @@ package com.austinhub.apiservice.repository;
 
 import com.austinhub.apiservice.model.dto.MyBoothDTO;
 import com.austinhub.apiservice.model.po.Booth;
-import com.austinhub.apiservice.model.po.Category;
-import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
-public interface BoothRepository extends JpaRepository<Booth, Integer> {
-
-    List<Booth> findAllByCategory(Category category);
-
+public interface BoothRepository extends JpaRepository<Booth, Integer>, BoothRepositoryCustom {
     @Override
     <S extends Booth> S save(S s);
 

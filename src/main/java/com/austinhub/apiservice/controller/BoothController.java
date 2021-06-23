@@ -1,8 +1,8 @@
 package com.austinhub.apiservice.controller;
 
 import com.austinhub.apiservice.model.CategoryType;
+import com.austinhub.apiservice.model.PageList;
 import com.austinhub.apiservice.model.dto.CreateBoothRequest;
-import com.austinhub.apiservice.model.dto.MyAdsDTO;
 import com.austinhub.apiservice.model.dto.MyBoothDTO;
 import com.austinhub.apiservice.model.dto.UpdateBoothRequest;
 import com.austinhub.apiservice.model.po.Booth;
@@ -28,29 +28,34 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/booths")
 public class BoothController {
 
-    private final BoothService boothService;
-    private final CategoryService categoryService;
+  private BoothService boothService;
+  private CategoryService categoryService;
 
-    public BoothController(BoothService boothService,
-            CategoryService categoryService) {
-        this.boothService = boothService;
-        this.categoryService = categoryService;
-    }
+  public BoothController(BoothService boothService,
+          CategoryService categoryService) {
+    this.boothService = boothService;
+    this.categoryService = categoryService;
+  }
 
-    @GetMapping
-    public ResponseEntity<List<Booth>> findBoothsByCategory(
-            @Valid @NotNull @RequestParam String name,
-            @Valid @NotNull @RequestParam CategoryType type) {
-        Category category = categoryService.findCategory(name, type);
-        return ResponseEntity.ok().body(boothService.findByCategory(category.getId()));
-    }
+  @GetMapping
+  public ResponseEntity<PageList<Booth>> findBoothsByCategory(
+      @Valid @NotNull @RequestParam String name,
+      @Valid @NotNull @RequestParam CategoryType type,
+      @Valid @NotNull @RequestParam int page,
+      @Valid @NotNull @RequestParam int pageSize,
+      @Valid @NotNull @RequestParam String query
+  ) {
+    Category category = categoryService.findCategory(name, type);
+    final PageList<Booth> booths = boothService.findByCategory(category.getId(), page, pageSize, query);
+    return ResponseEntity.ok().body(booths);
+  }
 
     @GetMapping ("/owned")
     public ResponseEntity<List<MyBoothDTO>> findOwnedBooths(@Valid @NotNull @RequestParam String accountName,
             @Valid @NotNull @RequestParam Boolean isArchived) {
         return ResponseEntity.ok().body(boothService.findOwnsBooths(accountName, isArchived));
     }
-    
+
     @PostMapping
     public ResponseEntity<Booth> saveBooth(
             @Valid @RequestBody CreateBoothRequest createBoothRequest) {

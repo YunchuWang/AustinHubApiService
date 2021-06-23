@@ -1,9 +1,9 @@
 package com.austinhub.apiservice.service;
 
 import com.austinhub.apiservice.model.CategoryType;
+import com.austinhub.apiservice.model.PageList;
 import com.austinhub.apiservice.model.dto.CreateBoothDTO;
 import com.austinhub.apiservice.model.dto.CreateBoothRequest;
-import com.austinhub.apiservice.model.dto.MyAdsDTO;
 import com.austinhub.apiservice.model.dto.MyBoothDTO;
 import com.austinhub.apiservice.model.dto.OrderItemDTO;
 import com.austinhub.apiservice.model.dto.UpdateBoothRequest;
@@ -34,10 +34,15 @@ public class BoothService implements IOrderItemSaveService {
     private CategoryRepository categoryRepository;
     private ResourceTypeRepository resourceTypeRepository;
 
-    public List<Booth> findByCategory(int categoryId) {
-        Category category = Category.builder().id(categoryId).build();
-
-        return boothRepository.findAllByCategory(category);
+    public PageList<Booth> findByCategory(int categoryId, int page, int pageSize, String query) {
+        final int totalCount = boothRepository.countAll(categoryId, query);
+        final List<Booth> booths = boothRepository.findAllByCategory(categoryId, page, pageSize, query);
+        return PageList.<Booth>builder()
+                .page(page)
+                .pageSize(pageSize)
+                .totalCount(totalCount)
+                .entries(booths)
+                .build();
     }
 
     public Booth saveBooth(CreateBoothRequest createBoothRequest) {

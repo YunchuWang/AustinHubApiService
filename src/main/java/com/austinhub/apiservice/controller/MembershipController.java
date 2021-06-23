@@ -3,7 +3,6 @@ package com.austinhub.apiservice.controller;
 import com.austinhub.apiservice.model.dto.MembershipTypeDTO;
 import com.austinhub.apiservice.model.dto.UpdateMembershipSubscriptionDTO;
 import com.austinhub.apiservice.service.MembershipService;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import javax.validation.Valid;
 import org.springframework.http.ResponseEntity;

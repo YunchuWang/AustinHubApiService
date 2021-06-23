@@ -1,9 +1,8 @@
 package com.austinhub.apiservice.controller;
 
 import com.austinhub.apiservice.model.CategoryType;
-import com.austinhub.apiservice.model.dto.MyAdsDTO;
+import com.austinhub.apiservice.model.PageList;
 import com.austinhub.apiservice.model.dto.MyJobDTO;
-import com.austinhub.apiservice.model.dto.UpdateAdsRequest;
 import com.austinhub.apiservice.model.dto.UpdateJobRequest;
 import com.austinhub.apiservice.model.po.Category;
 import com.austinhub.apiservice.model.po.Job;
@@ -11,7 +10,6 @@ import com.austinhub.apiservice.service.CategoryService;
 import com.austinhub.apiservice.service.JobsService;
 import com.austinhub.apiservice.utils.GsonUtils;
 import java.util.List;
-import java.util.Objects;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RequestMapping("/jobs")
 public class JobController {
-    private final JobsService jobsService;
-    private final CategoryService categoryService;
+    private JobsService jobsService;
+    private CategoryService categoryService;
 
     public JobController(JobsService jobsService,
             CategoryService categoryService) {
@@ -48,12 +46,18 @@ public class JobController {
         jobsService.updateJob(updates);
         return ResponseEntity.ok(GsonUtils.getGson().toJson("updated"));
     }
-    
+
     @GetMapping
-    public ResponseEntity<List<Job>> findJobsByCategory(
-            @Valid @NotNull @RequestParam String name, @Valid @NotNull @RequestParam CategoryType type) {
+    public ResponseEntity<PageList<Job>> findJobsByCategory(
+            @Valid @NotNull @RequestParam String name,
+            @Valid @NotNull @RequestParam CategoryType type,
+            @Valid @NotNull @RequestParam int page,
+            @Valid @NotNull @RequestParam int pageSize,
+            @Valid @NotNull @RequestParam String query
+    ) {
         Category category = categoryService.findCategory(name, type);
-        Objects.requireNonNull(category);
-        return ResponseEntity.ok().body(jobsService.findByCategory(category.getId()));
+        final PageList<Job> jobs = jobsService.findByCategory(category.getId(), page, pageSize, query);
+        return ResponseEntity.ok().body(jobs);
     }
+
 }

@@ -1,6 +1,5 @@
 package com.austinhub.apiservice.controller;
 
-import com.austinhub.apiservice.model.po.Ads;
 import com.austinhub.apiservice.model.po.Order;
 import com.austinhub.apiservice.service.OrderService;
 import java.util.List;
