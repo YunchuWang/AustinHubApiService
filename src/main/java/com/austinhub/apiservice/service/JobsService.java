@@ -1,6 +1,7 @@
 package com.austinhub.apiservice.service;
 
 import com.austinhub.apiservice.model.CategoryType;
+import com.austinhub.apiservice.model.PageList;
 import com.austinhub.apiservice.model.dto.JobDTO;
 import com.austinhub.apiservice.model.dto.OrderItemDTO;
 import com.austinhub.apiservice.model.po.Account;
@@ -30,10 +31,15 @@ public class JobsService implements IOrderItemSaveService {
     private CategoryRepository categoryRepository;
     private ResourceTypeRepository resourceTypeRepository;
 
-    public List<Job> findByCategory(int categoryId) {
-        Category category = Category.builder().id(categoryId).build();
-
-        return jobRepository.findByCategory(category);
+    public PageList<Job> findByCategory(int categoryId, int page, int pageSize, String query) {
+        final int totalCount = jobRepository.countAll(categoryId, query);
+        final List<Job> jobs = jobRepository.findAllByCategory(categoryId, page, pageSize, query);
+        return PageList.<Job>builder()
+                .page(page)
+                .pageSize(pageSize)
+                .totalCount(totalCount)
+                .entries(jobs)
+                .build();
     }
 
     @Override

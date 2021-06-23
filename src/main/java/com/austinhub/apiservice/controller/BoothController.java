@@ -1,12 +1,12 @@
 package com.austinhub.apiservice.controller;
 
 import com.austinhub.apiservice.model.CategoryType;
+import com.austinhub.apiservice.model.PageList;
 import com.austinhub.apiservice.model.dto.BoothRequest;
 import com.austinhub.apiservice.model.po.Booth;
 import com.austinhub.apiservice.model.po.Category;
 import com.austinhub.apiservice.service.BoothService;
 import com.austinhub.apiservice.service.CategoryService;
-import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
@@ -33,10 +33,16 @@ public class BoothController {
   }
 
   @GetMapping
-  public ResponseEntity<List<Booth>> findBoothsByCategory(
-      @Valid @NotNull @RequestParam String name, @Valid @NotNull @RequestParam CategoryType type) {
+  public ResponseEntity<PageList<Booth>> findBoothsByCategory(
+      @Valid @NotNull @RequestParam String name,
+      @Valid @NotNull @RequestParam CategoryType type,
+      @Valid @NotNull @RequestParam int page,
+      @Valid @NotNull @RequestParam int pageSize,
+      @Valid @NotNull @RequestParam String query
+  ) {
     Category category = categoryService.findCategory(name, type);
-    return ResponseEntity.ok().body(boothService.findByCategory(category.getId()));
+    final PageList<Booth> booths = boothService.findByCategory(category.getId(), page, pageSize, query);
+    return ResponseEntity.ok().body(booths);
   }
 
   @PostMapping
