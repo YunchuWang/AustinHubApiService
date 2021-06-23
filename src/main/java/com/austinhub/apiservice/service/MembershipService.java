@@ -1,9 +1,9 @@
 package com.austinhub.apiservice.service;
 
-import com.austinhub.apiservice.model.dto.AdsDTO;
-import com.austinhub.apiservice.model.dto.BoothDTO;
-import com.austinhub.apiservice.model.dto.JobDTO;
-import com.austinhub.apiservice.model.dto.MembershipDTO;
+import com.austinhub.apiservice.model.dto.CreateAdsDTO;
+import com.austinhub.apiservice.model.dto.CreateBoothDTO;
+import com.austinhub.apiservice.model.dto.CreateJobDTO;
+import com.austinhub.apiservice.model.dto.CreateMembershipDTO;
 import com.austinhub.apiservice.model.dto.MembershipTypeDTO;
 import com.austinhub.apiservice.model.dto.OrderItemDTO;
 import com.austinhub.apiservice.model.dto.ResourceLimit;
@@ -49,14 +49,14 @@ public class MembershipService implements IOrderItemSaveService {
     public void save(OrderItemDTO orderItemDTO, Account account,
             Date createdTimestamp, Integer orderId, Integer membershipId,
             String resourceTypeName) {
-        MembershipDTO membershipDTO = (MembershipDTO) orderItemDTO;
+        CreateMembershipDTO createMembershipDTO = (CreateMembershipDTO) orderItemDTO;
         MembershipType membershipType = membershipTypeRepository
-                .findMembershipTypeByName(membershipDTO.getMembershipType().getType());
+                .findMembershipTypeByName(createMembershipDTO.getMembershipType().getType());
         Membership savedMembership = membershipRepository
                 .save(Membership.builder()
                         .membershipType(membershipType)
                         .account(account)
-                        .autoSubscribed(membershipDTO.isAutoSubscribed())
+                        .autoSubscribed(createMembershipDTO.isAutoSubscribed())
                         .createdTimestamp(createdTimestamp)
                         .expirationTimestamp(ApplicationUtils
                                 .calculateOrderItemExpirationTimestamp(
@@ -64,8 +64,8 @@ public class MembershipService implements IOrderItemSaveService {
                                         createdTimestamp))
                         .orderId(orderId)
                         .build());
-        System.out.println(membershipDTO.getResourceItems());
-        for (OrderItemDTO resourceItem : membershipDTO.getResourceItems()) {
+        System.out.println(createMembershipDTO.getResourceItems());
+        for (OrderItemDTO resourceItem : createMembershipDTO.getResourceItems()) {
             IOrderItemSaveService orderItemSaveService = this.getOrderItemSaveService(resourceItem);
             orderItemSaveService.save(resourceItem, account, createdTimestamp, orderId,
                     savedMembership.getId(), resourceItem.getItemType().name().toLowerCase());
@@ -73,15 +73,19 @@ public class MembershipService implements IOrderItemSaveService {
     }
 
     public IOrderItemSaveService getOrderItemSaveService(OrderItemDTO orderItemDTO) {
-        if (orderItemDTO instanceof AdsDTO) {
+        if (orderItemDTO instanceof CreateAdsDTO) {
             return adsService;
-        } else if (orderItemDTO instanceof BoothDTO) {
+        } else if (orderItemDTO instanceof CreateBoothDTO) {
             return boothService;
-        } else if (orderItemDTO instanceof JobDTO) {
+        } else if (orderItemDTO instanceof CreateJobDTO) {
             return jobsService;
         }
 
         System.out.println(orderItemDTO.toString());
         throw new RuntimeException("Invalid order item type!");
+    }
+
+    public void updateMembershipSubscription(Integer membershipId, Boolean autoSubscribed) {
+        membershipRepository.updateAutoSubscribed(membershipId, autoSubscribed);
     }
 }

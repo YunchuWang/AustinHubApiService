@@ -11,7 +11,7 @@ import lombok.ToString;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BoothDTO extends OrderItemDTO {
+public class CreateBoothDTO extends OrderItemDTO {
     private String name;
     private String description;
     private Integer salary;

@@ -7,7 +7,6 @@ import javax.validation.ConstraintValidatorContext;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 public class MobileValidator implements ConstraintValidator<Mobile, String> {
 
 	public MobileValidator() {

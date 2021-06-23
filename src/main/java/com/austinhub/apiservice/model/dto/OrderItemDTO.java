@@ -11,10 +11,10 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "itemType", visible = true)
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = JobDTO.class, name = "JOB"),
-        @JsonSubTypes.Type(value = AdsDTO.class, name = "ADS"),
-        @JsonSubTypes.Type(value = BoothDTO.class, name = "BOOTH"),
-        @JsonSubTypes.Type(value = MembershipDTO.class, name = "MEMBERSHIP")
+        @JsonSubTypes.Type(value = CreateJobDTO.class, name = "JOB"),
+        @JsonSubTypes.Type(value = CreateAdsDTO.class, name = "ADS"),
+        @JsonSubTypes.Type(value = CreateBoothDTO.class, name = "BOOTH"),
+        @JsonSubTypes.Type(value = CreateMembershipDTO.class, name = "MEMBERSHIP")
 }
 )
 public abstract class OrderItemDTO {

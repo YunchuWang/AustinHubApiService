@@ -2,9 +2,11 @@ package com.austinhub.apiservice.service;
 
 import com.austinhub.apiservice.model.CategoryType;
 import com.austinhub.apiservice.model.PageList;
-import com.austinhub.apiservice.model.dto.BoothDTO;
-import com.austinhub.apiservice.model.dto.BoothRequest;
+import com.austinhub.apiservice.model.dto.CreateBoothDTO;
+import com.austinhub.apiservice.model.dto.CreateBoothRequest;
+import com.austinhub.apiservice.model.dto.MyBoothDTO;
 import com.austinhub.apiservice.model.dto.OrderItemDTO;
+import com.austinhub.apiservice.model.dto.UpdateBoothRequest;
 import com.austinhub.apiservice.model.po.Account;
 import com.austinhub.apiservice.model.po.Booth;
 import com.austinhub.apiservice.model.po.Category;
@@ -43,7 +45,7 @@ public class BoothService implements IOrderItemSaveService {
                 .build();
     }
 
-    public Booth saveBooth(BoothRequest boothRequest) {
+    public Booth saveBooth(CreateBoothRequest createBoothRequest) {
 //    Booth booth =
 //        Booth.builder()
 //            .name(boothRequest.getName())
@@ -60,7 +62,7 @@ public class BoothService implements IOrderItemSaveService {
     @Override
     public void save(OrderItemDTO orderItemDTO, Account account, Date createdTimestamp,
             Integer orderId, Integer membershipId, String resourceTypeName) {
-        final BoothDTO boothDTO = (BoothDTO) orderItemDTO;
+        final CreateBoothDTO createBoothDTO = (CreateBoothDTO) orderItemDTO;
         final ResourceType resourceType = resourceTypeRepository
                 .findResourceTypeByTableName(resourceTypeName);
         final Resource resource = Resource.builder()
@@ -68,26 +70,59 @@ public class BoothService implements IOrderItemSaveService {
                 .createdTimestamp(createdTimestamp)
                 .expirationTimestamp(
                         ApplicationUtils
-                                .calculateOrderItemExpirationTimestamp(boothDTO.getPricingPlan(),
+                                .calculateOrderItemExpirationTimestamp(
+                                        createBoothDTO.getPricingPlan(),
                                         createdTimestamp))
                 .orderId(orderId)
                 .resourceType(resourceType)
                 .build();
         final Category category = categoryRepository
-                .findByNameAndCategoryType(boothDTO.getCategoryName(),
+                .findByNameAndCategoryType(createBoothDTO.getCategoryName(),
                         CategoryType.RESC);
         System.out.println(category.toString());
         final Booth booth = Booth.builder()
                 .resource(resource)
-                .name(boothDTO.getName())
-                .phone(boothDTO.getPhone())
-                .email(boothDTO.getEmail())
-                .description(boothDTO.getDescription())
+                .name(createBoothDTO.getName())
+                .phone(createBoothDTO.getPhone())
+                .email(createBoothDTO.getEmail())
+                .description(createBoothDTO.getDescription())
                 .category(category)
-                .webLink(boothDTO.getWebLink())
-                .address(boothDTO.getAddress())
+                .webLink(createBoothDTO.getWebLink())
+                .address(createBoothDTO.getAddress())
                 .build();
 
         boothRepository.save(booth);
+    }
+
+    public void updateBooth(UpdateBoothRequest updates) {
+        // Get existing booth
+        Booth booth = boothRepository.getOne(updates.getId());
+
+        if (booth == null) {
+            throw new RuntimeException("Booth does not exist");
+        }
+
+        Category newCategory =
+                categoryRepository.findByNameAndCategoryType(updates.getCategoryName(),
+                        CategoryType.RESC);
+
+        if (newCategory == null) {
+            throw new RuntimeException(
+                    String.format("Category %s does not exist", updates.getCategoryName()));
+        }
+
+        booth.setName(updates.getName());
+        booth.setAddress(updates.getAddress());
+        booth.setPhone(updates.getPhone());
+        booth.setEmail(updates.getEmail());
+        booth.setDescription(updates.getDescription());
+        booth.setWebLink(updates.getWebLink());
+        booth.setCategory(newCategory);
+        // Update booth
+        boothRepository.save(booth);
+    }
+
+    public List<MyBoothDTO> findOwnsBooths(String accountName, Boolean isArchived) {
+        return boothRepository.findByAccountNameAndArchived(accountName, isArchived);
     }
 }

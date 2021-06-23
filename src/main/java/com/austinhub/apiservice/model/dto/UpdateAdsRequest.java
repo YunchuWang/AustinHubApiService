@@ -1,24 +1,23 @@
 package com.austinhub.apiservice.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BoothRequest {
-    @NotBlank
+@JsonIgnoreProperties
+public class UpdateAdsRequest {
+
+    private Integer id;
     private String name;
-    @NotBlank
+    private String address;
     private String phone;
-    @NotBlank
     private String email;
-    @NotBlank
     private String description;
-    @NotNull
-    private Integer categoryRelationId;
+    private String categoryName;
+    private String webLink;
+    private String imageLink;
 }

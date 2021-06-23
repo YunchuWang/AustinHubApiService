@@ -1,25 +1,23 @@
 package com.austinhub.apiservice.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Data
-@ToString(callSuper = true)
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class AdsDTO extends OrderItemDTO {
+@NoArgsConstructor
+@JsonIgnoreProperties
+public class UpdateJobRequest {
+
+    private Integer id;
     private String name;
     private String description;
-    private Integer salary;
+    private String salary;
     private String phone;
     private String address;
-    private String email;
     private String contact;
     private String categoryName;
-    private String webLink;
-    private String imageUploaded;
+    private String companyLink;
 }
