@@ -97,7 +97,6 @@ public class PaymentController {
         this.orderService.updateOrder(createdOrder);
 
         if (OrderStatus.COMPLETED.equals(createdOrder.getStatus())) {
-            // TODO: send order confirm email
             final String accountEmail = createdOrder.getAccount().getEmail();
             System.out.println("Email : " + accountEmail);
             kafkaTemplate.send("email", mailService.constructOrderConfirmationEmail(accountEmail,

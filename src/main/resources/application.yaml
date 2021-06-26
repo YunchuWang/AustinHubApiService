@@ -17,9 +17,12 @@ spring:
   devtools:
     livereload:
       enabled: true
+  quartz:
+    job-store-type: memory
 
+      
 support:
-  email: yunchuwang6@gmail.com
+  email: austinhubhuaren@gmail.com
   
 server:
   port: 9001
