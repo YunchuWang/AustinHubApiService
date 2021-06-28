@@ -11,17 +11,22 @@ import java.math.BigInteger;
 import java.util.List;
 
 public class BoothRepositoryCustomImpl implements BoothRepositoryCustom {
+    private static final Integer ALL_CATEGORY_ID = 12;
 
     @PersistenceContext
     private EntityManager entityManager;
 
     @Override
     public int countAll(final int categoryId, final String queryStr) {
+        final String categoryIdStr = ALL_CATEGORY_ID.equals(categoryId)
+                ? ""
+                : "categoryId=" + categoryId + " and";
         final Query query = entityManager.createNativeQuery(
-                String.format("select count(1) from booth where categoryId=%1$s"
-                        + " and ( name like '%2$s'"
+                String.format("select count(1) from booth"
+                        + " where %1$s"
+                        + " (name like '%2$s'"
                         + " or address like '%2$s'"
-                        + " or description like '%2$s')", categoryId, "%" + queryStr + "%")
+                        + " or description like '%2$s')", categoryIdStr, "%" + queryStr + "%")
         );
         return ((BigInteger) query.getSingleResult()).intValue();
     }
@@ -35,16 +40,19 @@ public class BoothRepositoryCustomImpl implements BoothRepositoryCustom {
             final OrderBy orderBy
     ) {
         final int offset = page * pageSize;
+        final String categoryIdStr = ALL_CATEGORY_ID.equals(categoryId)
+                ? ""
+                : "booth.categoryId=" + categoryId + " and";
         final String orderByStr = getOrderByStr(orderBy);
         final Query query = entityManager.createNativeQuery(
                 String.format(
                         "select * from booth"
                                 + " left join category on booth.categoryId=category.id"
                                 + " left join resource on booth.resourceId=resource.id"
-                                + " where booth.categoryId=%1$s"
-                                + " and (booth.name like '%2$s' or booth.address like '%2$s' or booth.description like '%2$s')"
+                                + " where %1$s"
+                                + " (booth.name like '%2$s' or booth.address like '%2$s' or booth.description like '%2$s')"
                                 + " order by %3$s limit %4$s offset %5$s",
-                        categoryId, "%" + queryStr + "%", orderByStr, pageSize, offset),
+                        categoryIdStr, "%" + queryStr + "%", orderByStr, pageSize, offset),
                 Booth.class
         );
         return query.getResultList();
