@@ -6,6 +6,7 @@ import com.austinhub.apiservice.model.dto.CreateJobDTO;
 import com.austinhub.apiservice.model.dto.MyJobDTO;
 import com.austinhub.apiservice.model.dto.OrderItemDTO;
 import com.austinhub.apiservice.model.dto.UpdateJobRequest;
+import com.austinhub.apiservice.model.enums.OrderBy;
 import com.austinhub.apiservice.model.po.Account;
 import com.austinhub.apiservice.model.po.Category;
 import com.austinhub.apiservice.model.po.Job;
@@ -33,9 +34,15 @@ public class JobsService implements IOrderItemSaveService {
     private CategoryRepository categoryRepository;
     private ResourceTypeRepository resourceTypeRepository;
 
-    public PageList<Job> findByCategory(int categoryId, int page, int pageSize, String query) {
+    public PageList<Job> findByCategory(
+            int categoryId,
+            int page,
+            int pageSize,
+            String query,
+            OrderBy orderBy
+    ) {
         final int totalCount = jobRepository.countAll(categoryId, query);
-        final List<Job> jobs = jobRepository.findAllByCategory(categoryId, page, pageSize, query);
+        final List<Job> jobs = jobRepository.findAllByCategory(categoryId, page, pageSize, query, orderBy);
         return PageList.<Job>builder()
                 .page(page)
                 .pageSize(pageSize)

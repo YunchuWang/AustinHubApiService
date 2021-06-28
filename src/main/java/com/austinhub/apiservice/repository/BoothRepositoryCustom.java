@@ -1,5 +1,6 @@
 package com.austinhub.apiservice.repository;
 
+import com.austinhub.apiservice.model.enums.OrderBy;
 import com.austinhub.apiservice.model.po.Booth;
 
 import java.util.List;
@@ -11,6 +12,7 @@ public interface BoothRepositoryCustom {
             final int categoryId,
             final int page,
             final int pageSize,
-            final String query
+            final String query,
+            final OrderBy orderBy
     );
 }
