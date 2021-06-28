@@ -5,6 +5,7 @@ import com.austinhub.apiservice.model.PageList;
 import com.austinhub.apiservice.model.dto.CreateBoothRequest;
 import com.austinhub.apiservice.model.dto.MyBoothDTO;
 import com.austinhub.apiservice.model.dto.UpdateBoothRequest;
+import com.austinhub.apiservice.model.enums.OrderBy;
 import com.austinhub.apiservice.model.po.Booth;
 import com.austinhub.apiservice.model.po.Category;
 import com.austinhub.apiservice.service.BoothService;
@@ -41,12 +42,13 @@ public class BoothController {
   public ResponseEntity<PageList<Booth>> findBoothsByCategory(
       @Valid @NotNull @RequestParam String name,
       @Valid @NotNull @RequestParam CategoryType type,
-      @Valid @NotNull @RequestParam int page,
+      @Valid @NotNull @RequestParam(defaultValue = "0") int page,
       @Valid @NotNull @RequestParam int pageSize,
-      @Valid @NotNull @RequestParam String query
+      @Valid @NotNull @RequestParam(defaultValue = "") String query,
+      @Valid @NotNull @RequestParam(defaultValue = "TITLE") OrderBy orderBy
   ) {
     Category category = categoryService.findCategory(name, type);
-    final PageList<Booth> booths = boothService.findByCategory(category.getId(), page, pageSize, query);
+    final PageList<Booth> booths = boothService.findByCategory(category.getId(), page, pageSize, query, orderBy);
     return ResponseEntity.ok().body(booths);
   }
 

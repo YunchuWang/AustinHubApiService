@@ -4,6 +4,7 @@ import com.austinhub.apiservice.model.CategoryType;
 import com.austinhub.apiservice.model.PageList;
 import com.austinhub.apiservice.model.dto.MyJobDTO;
 import com.austinhub.apiservice.model.dto.UpdateJobRequest;
+import com.austinhub.apiservice.model.enums.OrderBy;
 import com.austinhub.apiservice.model.po.Category;
 import com.austinhub.apiservice.model.po.Job;
 import com.austinhub.apiservice.service.CategoryService;
@@ -51,12 +52,13 @@ public class JobController {
     public ResponseEntity<PageList<Job>> findJobsByCategory(
             @Valid @NotNull @RequestParam String name,
             @Valid @NotNull @RequestParam CategoryType type,
-            @Valid @NotNull @RequestParam int page,
+            @Valid @NotNull @RequestParam(defaultValue = "0") int page,
             @Valid @NotNull @RequestParam int pageSize,
-            @Valid @NotNull @RequestParam String query
+            @Valid @NotNull @RequestParam(defaultValue = "") String query,
+            @Valid @NotNull @RequestParam(defaultValue = "TITLE") OrderBy orderBy
     ) {
         Category category = categoryService.findCategory(name, type);
-        final PageList<Job> jobs = jobsService.findByCategory(category.getId(), page, pageSize, query);
+        final PageList<Job> jobs = jobsService.findByCategory(category.getId(), page, pageSize, query, orderBy);
         return ResponseEntity.ok().body(jobs);
     }
 
