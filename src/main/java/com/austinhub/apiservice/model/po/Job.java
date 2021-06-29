@@ -1,6 +1,5 @@
 package com.austinhub.apiservice.model.po;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,9 +40,10 @@ public class Job {
     @JoinColumn(name = "categoryId", nullable = false)
     private Category category;
 
-    @OneToOne(cascade = {CascadeType.REMOVE, CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    // TODO: hide account private info?
+    @OneToOne
+    @MapsId
     @JoinColumn(name = "resourceId", referencedColumnName = "id")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Resource resource;
 
     @Column(name = "companyLink")

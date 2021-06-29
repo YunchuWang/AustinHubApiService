@@ -49,8 +49,12 @@ public class BoothRepositoryCustomImpl implements BoothRepositoryCustom {
                         "select * from booth"
                                 + " left join category on booth.categoryId=category.id"
                                 + " left join resource on booth.resourceId=resource.id"
+                                + " left join `order` on resource.orderId=`order`.id"
                                 + " where %1$s"
                                 + " (booth.name like '%2$s' or booth.address like '%2$s' or booth.description like '%2$s')"
+                                + " and resource.expirationTimestamp >= CURRENT_TIMESTAMP"
+                                + " and resource.isArchived=0"
+                                + " and `order`.status='COMPLETED'"
                                 + " order by %3$s limit %4$s offset %5$s",
                         categoryIdStr, "%" + queryStr + "%", orderByStr, pageSize, offset),
                 Booth.class

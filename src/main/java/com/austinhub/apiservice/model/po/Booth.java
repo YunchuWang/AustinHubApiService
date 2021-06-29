@@ -2,7 +2,6 @@ package com.austinhub.apiservice.model.po;
 
 import com.austinhub.apiservice.validator.ExtendedEmailValidator;
 import com.austinhub.apiservice.validator.Mobile;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,9 +30,10 @@ public class Booth implements Serializable {
 	@Column(name = "id")
 	private Integer id;
 
-	@OneToOne(cascade = {CascadeType.REMOVE, CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+   	// TODO: hide account private info?
+	@OneToOne
+	@MapsId
 	@JoinColumn(name = "resourceId", referencedColumnName = "id")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private Resource resource;
 
 	@NotBlank
