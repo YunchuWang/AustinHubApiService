@@ -49,8 +49,12 @@ public class JobRepositoryCustomImpl implements JobRepositoryCustom {
                         "select * from job"
                                 + " left join category on job.categoryId=category.id"
                                 + " left join resource on job.resourceId=resource.id"
+                                + " left join `order` on resource.orderId=`order`.id"
                                 + " where %1$s"
                                 + " (job.name like '%2$s' or job.address like '%2$s' or job.description like '%2$s')"
+                                + " and (resource.expirationTimestamp >= CURRENT_TIMESTAMP)"
+                                + " and resource.isArchived=0"
+                                + " and `order`.status='COMPLETED'"
                                 + " order by %3$s limit %4$s offset %5$s",
                         categoryIdStr, "%" + queryStr + "%", orderByStr, pageSize, offset),
                 Job.class
