@@ -22,11 +22,17 @@ public class JobRepositoryCustomImpl implements JobRepositoryCustom {
                 ? ""
                 : "categoryId=" + categoryId + " and";
         final Query query = entityManager.createNativeQuery(
-                String.format("select count(1) from job"
-                        + " where %1$s"
-                        + " (name like '%2$s'"
-                        + " or address like '%2$s'"
-                        + " or description like '%2$s')", categoryIdStr, "%" + queryStr + "%")
+                String.format(
+                        "select count(1) from job"
+                                + " left join category on job.categoryId=category.id"
+                                + " left join resource on job.resourceId=resource.id"
+                                + " left join `order` on resource.orderId=`order`.id"
+                                + " where %1$s"
+                                + " (job.name like '%2$s' or job.address like '%2$s' or job.description like '%2$s')"
+                                + " and (resource.expirationTimestamp >= CURRENT_TIMESTAMP)"
+                                + " and resource.isArchived=0"
+                                + " and `order`.status='COMPLETED'",
+                        categoryIdStr, "%" + queryStr + "%")
         );
         return ((BigInteger) query.getSingleResult()).intValue();
     }
