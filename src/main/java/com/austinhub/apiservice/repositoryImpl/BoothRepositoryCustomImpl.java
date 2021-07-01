@@ -22,11 +22,17 @@ public class BoothRepositoryCustomImpl implements BoothRepositoryCustom {
                 ? ""
                 : "categoryId=" + categoryId + " and";
         final Query query = entityManager.createNativeQuery(
-                String.format("select count(1) from booth"
-                        + " where %1$s"
-                        + " (name like '%2$s'"
-                        + " or address like '%2$s'"
-                        + " or description like '%2$s')", categoryIdStr, "%" + queryStr + "%")
+                String.format(
+                        "select count(1) from booth"
+                                + " left join category on booth.categoryId=category.id"
+                                + " left join resource on booth.resourceId=resource.id"
+                                + " left join `order` on resource.orderId=`order`.id"
+                                + " where %1$s"
+                                + " (booth.name like '%2$s' or booth.address like '%2$s' or booth.description like '%2$s')"
+                                + " and (resource.expirationTimestamp >= CURRENT_TIMESTAMP)"
+                                + " and resource.isArchived=0"
+                                + " and `order`.status='COMPLETED'",
+                        categoryIdStr, "%" + queryStr + "%")
         );
         return ((BigInteger) query.getSingleResult()).intValue();
     }
