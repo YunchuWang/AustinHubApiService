@@ -84,8 +84,4 @@ public class MembershipService implements IOrderItemSaveService {
         System.out.println(orderItemDTO.toString());
         throw new RuntimeException("Invalid order item type!");
     }
-
-    public void updateMembershipSubscription(Integer membershipId, Boolean autoSubscribed) {
-        membershipRepository.updateAutoSubscribed(membershipId, autoSubscribed);
-    }
 }
