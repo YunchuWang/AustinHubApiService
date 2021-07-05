@@ -6,6 +6,7 @@ import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +36,7 @@ public class QuartzConfig {
     }
 
     @Bean
+    @Qualifier("expirationEmailReminderJobDetail")
     public JobDetail expirationEmailReminderJobDetail() {
         return JobBuilder.newJob(ExpirationEmailReminderJob.class)
                          .withIdentity(JOB_EXPIRATION_EMAIL_REMINDER, JOB_GROUP_EXPIRATION_EMAIL)
@@ -43,6 +45,7 @@ public class QuartzConfig {
     }
 
     @Bean
+    @Qualifier("transactionStatusScannerJobDetail")
     public JobDetail transactionStatusScannerJobDetail() {
         return JobBuilder.newJob(TransactionStatusScannerJob.class)
                          .withIdentity(JOB_TRAN_STATUS_SCANNER, JOB_GROUP_TRAN_STATUS_SCANNER)
@@ -71,8 +74,7 @@ public class QuartzConfig {
         return TriggerBuilder.newTrigger().forJob(transactionStatusScannerJobDetail)
                              .withIdentity(TRIGGER_TRAN_STATUS_SCANNER,
                                            JOB_GROUP_TRAN_STATUS_SCANNER)
-//                             .withSchedule(dailyAtHourAndMinute(22, 59))
-                             .startNow()
+                             .withSchedule(dailyAtHourAndMinute(22, 59))
                              .build();
     }
 
