@@ -29,8 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/booths")
 public class BoothController {
 
-  private BoothService boothService;
-  private CategoryService categoryService;
+  private final BoothService boothService;
+  private final CategoryService categoryService;
 
   public BoothController(BoothService boothService,
           CategoryService categoryService) {

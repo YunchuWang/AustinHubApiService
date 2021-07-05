@@ -1,7 +1,9 @@
 package com.austinhub.apiservice.model.po;
 
 import java.util.Date;
+import java.util.Set;
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,12 +36,19 @@ public class Membership {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "expirationTimestamp")
     private Date expirationTimestamp;
-
+    
+    @Column(name = "isArchived", columnDefinition = "boolean default false")
+    private Boolean isArchived;
+    
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "createdTimestamp")
     private Date createdTimestamp;
 
-    @Column(name = "orderId")
-    private Integer orderId;
+    @ManyToMany
+    @JoinTable(
+            name = "membership_order",
+            joinColumns = @JoinColumn(name = "membershipId"),
+            inverseJoinColumns = @JoinColumn(name = "orderId"))
+    private Set<Order> orders;
 }

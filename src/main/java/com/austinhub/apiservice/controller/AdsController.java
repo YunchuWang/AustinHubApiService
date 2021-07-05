@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RequestMapping("/ads")
 public class AdsController {
-    private AdsService adsService;
+    private final AdsService adsService;
 
     public AdsController(AdsService adsService) {
         this.adsService = adsService;

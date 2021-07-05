@@ -5,12 +5,14 @@ import com.austinhub.apiservice.model.PageList;
 import com.austinhub.apiservice.model.dto.CreateBoothDTO;
 import com.austinhub.apiservice.model.dto.CreateBoothRequest;
 import com.austinhub.apiservice.model.dto.MyBoothDTO;
-import com.austinhub.apiservice.model.dto.OrderItemDTO;
+import com.austinhub.apiservice.model.dto.PlaceOrderItemDTO;
+import com.austinhub.apiservice.model.dto.RenewOrderItemDTO;
 import com.austinhub.apiservice.model.dto.UpdateBoothRequest;
 import com.austinhub.apiservice.model.enums.OrderBy;
 import com.austinhub.apiservice.model.po.Account;
 import com.austinhub.apiservice.model.po.Booth;
 import com.austinhub.apiservice.model.po.Category;
+import com.austinhub.apiservice.model.po.Order;
 import com.austinhub.apiservice.model.po.Resource;
 import com.austinhub.apiservice.model.po.ResourceType;
 import com.austinhub.apiservice.repository.BoothRepository;
@@ -19,6 +21,7 @@ import com.austinhub.apiservice.repository.ResourceTypeRepository;
 import com.austinhub.apiservice.utils.ApplicationUtils;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 @NoArgsConstructor
-public class BoothService implements IOrderItemSaveService {
+public class BoothService implements IOrderItemService {
 
     private BoothRepository boothRepository;
     private CategoryRepository categoryRepository;
@@ -67,26 +70,28 @@ public class BoothService implements IOrderItemSaveService {
     }
 
     @Override
-    public void save(OrderItemDTO orderItemDTO, Account account, Date createdTimestamp,
-            Integer orderId, Integer membershipId, String resourceTypeName) {
-        final CreateBoothDTO createBoothDTO = (CreateBoothDTO) orderItemDTO;
+    public void save(PlaceOrderItemDTO placeOrderItemDTO, Account account, Date createdTimestamp,
+            Order order, Integer membershipId, String resourceTypeName) {
+        final CreateBoothDTO createBoothDTO = (CreateBoothDTO) placeOrderItemDTO;
         final ResourceType resourceType = resourceTypeRepository
                 .findResourceTypeByTableName(resourceTypeName);
         final Resource resource = Resource.builder()
                 .account(account)
+                .name(createBoothDTO.getName())
+                .isArchived(false)
+                .categoryName(createBoothDTO.getCategoryName())
                 .createdTimestamp(createdTimestamp)
                 .expirationTimestamp(
                         ApplicationUtils
                                 .calculateOrderItemExpirationTimestamp(
                                         createBoothDTO.getPricingPlan(),
                                         createdTimestamp))
-                .orderId(orderId)
+                .orders(Set.of(order))
                 .resourceType(resourceType)
                 .build();
         final Category category = categoryRepository
                 .findByNameAndCategoryType(createBoothDTO.getCategoryName(),
                         CategoryType.RESC);
-        System.out.println(category.toString());
         final Booth booth = Booth.builder()
                 .resource(resource)
                 .name(createBoothDTO.getName())

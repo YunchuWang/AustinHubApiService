@@ -4,12 +4,14 @@ import com.austinhub.apiservice.model.CategoryType;
 import com.austinhub.apiservice.model.PageList;
 import com.austinhub.apiservice.model.dto.CreateJobDTO;
 import com.austinhub.apiservice.model.dto.MyJobDTO;
-import com.austinhub.apiservice.model.dto.OrderItemDTO;
+import com.austinhub.apiservice.model.dto.PlaceOrderItemDTO;
+import com.austinhub.apiservice.model.dto.RenewOrderItemDTO;
 import com.austinhub.apiservice.model.dto.UpdateJobRequest;
 import com.austinhub.apiservice.model.enums.OrderBy;
 import com.austinhub.apiservice.model.po.Account;
 import com.austinhub.apiservice.model.po.Category;
 import com.austinhub.apiservice.model.po.Job;
+import com.austinhub.apiservice.model.po.Order;
 import com.austinhub.apiservice.model.po.Resource;
 import com.austinhub.apiservice.model.po.ResourceType;
 import com.austinhub.apiservice.repository.CategoryRepository;
@@ -18,6 +20,7 @@ import com.austinhub.apiservice.repository.ResourceTypeRepository;
 import com.austinhub.apiservice.utils.ApplicationUtils;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 @NoArgsConstructor
-public class JobsService implements IOrderItemSaveService {
+public class JobsService implements IOrderItemService {
 
     private JobRepository jobRepository;
     private CategoryRepository categoryRepository;
@@ -52,19 +55,22 @@ public class JobsService implements IOrderItemSaveService {
     }
 
     @Override
-    public void save(OrderItemDTO orderItemDTO, Account account, Date createdTimestamp,
-            Integer orderId, Integer membershipId, String resourceTypeName) {
-        final CreateJobDTO createJobDTO = (CreateJobDTO) orderItemDTO;
+    public void save(PlaceOrderItemDTO placeOrderItemDTO, Account account, Date createdTimestamp,
+            Order order, Integer membershipId, String resourceTypeName) {
+        final CreateJobDTO createJobDTO = (CreateJobDTO) placeOrderItemDTO;
         final ResourceType resourceType = resourceTypeRepository
                 .findResourceTypeByTableName(resourceTypeName);
         final Resource resource = Resource.builder()
                 .account(account)
+                .name(createJobDTO.getName())
+                .isArchived(false)
+                .categoryName(createJobDTO.getCategoryName())
                 .createdTimestamp(createdTimestamp)
                 .expirationTimestamp(
                         ApplicationUtils
                                 .calculateOrderItemExpirationTimestamp(createJobDTO.getPricingPlan(),
                                         createdTimestamp))
-                .orderId(orderId)
+                .orders(Set.of(order))
                 .resourceType(resourceType)
                 .build();
         final Category category = categoryRepository
@@ -83,6 +89,10 @@ public class JobsService implements IOrderItemSaveService {
                 .build();
 
         jobRepository.save(job);
+    }
+
+    public void renew(RenewOrderItemDTO renewOrderItemDTO, Order order) {
+        
     }
 
     public List<MyJobDTO> findOwnsJobs(String accountName, Boolean isArchived) {

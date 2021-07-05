@@ -1,22 +1,20 @@
 package com.austinhub.apiservice.model.dto;
 
-import java.math.BigDecimal;
-import java.util.List;
-import javax.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import com.austinhub.apiservice.model.enums.OrderType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class OrderDTO {
-    @NotNull
-    private String accountName;
-    @NotNull
-    private BigDecimal price;
-    @NotNull
-    private List<OrderItemDTO> orderItems;
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "orderType", visible = true)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = PlaceOrderDTO.class, name = "NEW"),
+        @JsonSubTypes.Type(value = RenewOrderDTO.class, name = "RENEW"),
+}
+)
+public abstract class OrderDTO {
+
+    private OrderType orderType;
 }

@@ -26,8 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RequestMapping("/jobs")
 public class JobController {
-    private JobsService jobsService;
-    private CategoryService categoryService;
+    private final JobsService jobsService;
+    private final CategoryService categoryService;
 
     public JobController(JobsService jobsService,
             CategoryService categoryService) {

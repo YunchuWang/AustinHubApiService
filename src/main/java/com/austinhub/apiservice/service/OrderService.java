@@ -4,8 +4,11 @@ import com.austinhub.apiservice.model.dto.CreateAdsDTO;
 import com.austinhub.apiservice.model.dto.CreateBoothDTO;
 import com.austinhub.apiservice.model.dto.CreateJobDTO;
 import com.austinhub.apiservice.model.dto.CreateMembershipDTO;
-import com.austinhub.apiservice.model.dto.OrderDTO;
-import com.austinhub.apiservice.model.dto.OrderItemDTO;
+import com.austinhub.apiservice.model.dto.PlaceOrderDTO;
+import com.austinhub.apiservice.model.dto.PlaceOrderItemDTO;
+import com.austinhub.apiservice.model.dto.RenewOrderDTO;
+import com.austinhub.apiservice.model.dto.RenewOrderItemDTO;
+import com.austinhub.apiservice.model.enums.ItemType;
 import com.austinhub.apiservice.model.enums.OrderStatus;
 import com.austinhub.apiservice.model.po.Account;
 import com.austinhub.apiservice.model.po.Order;
@@ -28,18 +31,19 @@ public class OrderService {
     private OrderRepository orderRepository;
     private AccountRepository accountRepository;
     private AdsService adsService;
+    private ResourceService resourceService;
     private JobsService jobsService;
     private BoothService boothService;
     private MembershipService membershipService;
 
-    public Order saveOrder(@NonNull OrderDTO orderDto) {
+    public Order saveOrder(@NonNull PlaceOrderDTO placeOrderDto) {
         // create order first
         // get account
-        final Account account = accountRepository.findByUsername(orderDto.getAccountName());
+        final Account account = accountRepository.findByUsername(placeOrderDto.getAccountName());
         final Order order = Order.builder()
                 .account(account)
                 .orderNumber(UUID.randomUUID().toString())
-                .price(orderDto.getPrice())
+                .price(placeOrderDto.getPrice())
                 .status(OrderStatus.REQUESTED)
                 .build();
         final Order createdOrder = orderRepository.save(order);
@@ -47,21 +51,49 @@ public class OrderService {
         final int orderId = createdOrder.getId();
 
         // for each order item
-        for (OrderItemDTO orderItemDTO : orderDto.getOrderItems()) {
-            IOrderItemSaveService orderItemSaveService = this.getOrderItemSaveService(orderItemDTO);
+        for (PlaceOrderItemDTO placeOrderItemDTO : placeOrderDto.getOrderItems()) {
+            IOrderItemService orderItemSaveService = this.getOrderItemService(
+                    placeOrderItemDTO);
             orderItemSaveService
-                    .save(orderItemDTO, account, orderCreatedTimestamp, orderId,
-                            null, orderItemDTO.getItemType().name().toLowerCase());
+                    .save(placeOrderItemDTO, account, orderCreatedTimestamp, order,
+                            null, placeOrderItemDTO.getItemType().name().toLowerCase());
         }
 
         return createdOrder;
     }
 
+    public Order renewOrder(@NonNull RenewOrderDTO renewOrderDTO) {
+        // create order first
+        // get account
+        final Account account = accountRepository.findByUsername(renewOrderDTO.getAccountName());
+        final Order order = Order.builder()
+                .account(account)
+                .orderNumber(UUID.randomUUID().toString())
+                .price(renewOrderDTO.getPrice())
+                .status(OrderStatus.REQUESTED)
+                .build();
+        final Order createdOrder = orderRepository.save(order);
+
+        // only this part diff from place order, item already exists just need update
+        // expiration timestamp
+        // for each order item
+        for (RenewOrderItemDTO renewOrderItemDTO : renewOrderDTO.getOrderItems()) {
+            if (renewOrderItemDTO.getItemType().equals(ItemType.MEMBERSHIP)) {
+                membershipService.renew(renewOrderItemDTO, order);
+            } else {
+                resourceService.renew(renewOrderItemDTO, order);
+            }
+        }
+
+        return createdOrder;
+    }
+
+
     public void updateOrder(Order order) {
         this.orderRepository.save(order);
     }
 
-    public IOrderItemSaveService getOrderItemSaveService(OrderItemDTO orderItemDTO) {
+    public IOrderItemService getOrderItemService(PlaceOrderItemDTO orderItemDTO) {
         if (orderItemDTO instanceof CreateAdsDTO) {
             return adsService;
         } else if (orderItemDTO instanceof CreateBoothDTO) {
@@ -73,7 +105,7 @@ public class OrderService {
         }
         throw new RuntimeException("Invalid order item type!");
     }
-    
+
     public List<Order> findOwnedOrders(String accountName) {
         Account account = accountRepository.findByUsername(accountName);
         if (account == null) {

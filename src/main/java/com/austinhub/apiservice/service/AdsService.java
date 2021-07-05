@@ -3,11 +3,13 @@ package com.austinhub.apiservice.service;
 import com.austinhub.apiservice.model.CategoryType;
 import com.austinhub.apiservice.model.dto.CreateAdsDTO;
 import com.austinhub.apiservice.model.dto.MyAdsDTO;
-import com.austinhub.apiservice.model.dto.OrderItemDTO;
+import com.austinhub.apiservice.model.dto.PlaceOrderItemDTO;
+import com.austinhub.apiservice.model.dto.RenewOrderItemDTO;
 import com.austinhub.apiservice.model.dto.UpdateAdsRequest;
 import com.austinhub.apiservice.model.po.Account;
 import com.austinhub.apiservice.model.po.Ads;
 import com.austinhub.apiservice.model.po.Category;
+import com.austinhub.apiservice.model.po.Order;
 import com.austinhub.apiservice.model.po.Resource;
 import com.austinhub.apiservice.model.po.ResourceType;
 import com.austinhub.apiservice.repository.AdsRepository;
@@ -16,6 +18,7 @@ import com.austinhub.apiservice.repository.ResourceTypeRepository;
 import com.austinhub.apiservice.utils.ApplicationUtils;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 @NoArgsConstructor
-public class AdsService implements IOrderItemSaveService {
+public class AdsService implements IOrderItemService {
 
     private AdsRepository adsRepository;
     private CategoryRepository categoryRepository;
@@ -47,9 +50,6 @@ public class AdsService implements IOrderItemSaveService {
     public void updateAds(UpdateAdsRequest updates) {
         // Get existing ads
         Ads ads = adsRepository.getOne((updates.getId()));
-        if (ads == null) {
-            throw new RuntimeException("Ads does not exist");
-        }
 
         Category newCategory =
                 categoryRepository.findByNameAndCategoryType(updates.getCategoryName(),
@@ -74,20 +74,23 @@ public class AdsService implements IOrderItemSaveService {
     }
 
     @Override
-    public void save(OrderItemDTO orderItemDTO, Account account,
-            Date createdTimestamp, Integer orderId, Integer membershipId, String resourceTypeName) {
-        final CreateAdsDTO createAdsDTO = (CreateAdsDTO) orderItemDTO;
+    public void save(PlaceOrderItemDTO placeOrderItemDTO, Account account,
+            Date createdTimestamp, Order order, Integer membershipId, String resourceTypeName) {
+        final CreateAdsDTO createAdsDTO = (CreateAdsDTO) placeOrderItemDTO;
         final ResourceType resourceType = resourceTypeRepository
                 .findResourceTypeByTableName(resourceTypeName);
         final Resource resource = Resource.builder()
                 .account(account)
+                .name(createAdsDTO.getName())
+                .isArchived(false)
+                .categoryName(createAdsDTO.getCategoryName())
                 .createdTimestamp(createdTimestamp)
                 .expirationTimestamp(
                         ApplicationUtils
                                 .calculateOrderItemExpirationTimestamp(
                                         createAdsDTO.getPricingPlan(),
                                         createdTimestamp))
-                .orderId(orderId)
+                .orders(Set.of(order))
                 .resourceType(resourceType)
                 .build();
         final Category category = categoryRepository
@@ -106,5 +109,9 @@ public class AdsService implements IOrderItemSaveService {
                 .build();
 
         adsRepository.save(ads);
+    }
+
+    public void renew(RenewOrderItemDTO renewOrderItemDTO, Order order) {
+        
     }
 }
