@@ -89,14 +89,26 @@ public class MembershipService implements IOrderItemService {
         }
 
         // update resource order and expiration time
-        membership.setExpirationTimestamp(ApplicationUtils
-                .calculateOrderItemExpirationTimestamp(renewOrderItemDTO.getPricingPlan(),
-                        membership.getExpirationTimestamp()));
+//        membership.setExpirationTimestamp(ApplicationUtils
+//                .calculateOrderItemExpirationTimestamp(renewOrderItemDTO.getPricingPlan(),
+//                        membership.getExpirationTimestamp()));
         membership.getOrders().add(order);
 
         membershipRepository.save(membership);
     }
 
+    public void extendExpiration(RenewOrderItemDTO renewOrderItemDTO) {
+        final Membership membership =
+                membershipRepository.getOne(renewOrderItemDTO.getItemId());
+
+        // update resource order and expiration time
+        membership.setExpirationTimestamp(ApplicationUtils
+                .calculateOrderItemExpirationTimestamp(renewOrderItemDTO.getPricingPlan(),
+                        membership.getExpirationTimestamp()));
+
+        membershipRepository.save(membership);
+    }
+    
     public IOrderItemService getOrderItemSaveService(PlaceOrderItemDTO placeOrderItemDTO) {
         if (placeOrderItemDTO instanceof CreateAdsDTO) {
             return adsService;

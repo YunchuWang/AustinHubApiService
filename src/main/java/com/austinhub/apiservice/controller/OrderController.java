@@ -1,12 +1,17 @@
 package com.austinhub.apiservice.controller;
 
 import com.austinhub.apiservice.model.dto.MakePaymentDTO;
+import com.austinhub.apiservice.model.dto.OrderDTO;
 import com.austinhub.apiservice.model.dto.PlaceOrderDTO;
 import com.austinhub.apiservice.model.dto.RenewOrderDTO;
+import com.austinhub.apiservice.model.enums.ItemType;
 import com.austinhub.apiservice.model.enums.OrderStatus;
+import com.austinhub.apiservice.model.enums.OrderType;
 import com.austinhub.apiservice.model.po.Order;
 import com.austinhub.apiservice.service.MailService;
+import com.austinhub.apiservice.service.MembershipService;
 import com.austinhub.apiservice.service.OrderService;
+import com.austinhub.apiservice.service.ResourceService;
 import com.austinhub.apiservice.service.TransactionService;
 import com.austinhub.apiservice.utils.ApplicationUtils;
 import com.braintreegateway.BraintreeGateway;
@@ -43,6 +48,8 @@ public class OrderController {
 
     private final BraintreeGateway braintreeGateway;
     private final OrderService orderService;
+    private final ResourceService resourceService;
+    private final MembershipService membershipService;
     private final MailService mailService;
     private final TransactionService transactionService;
     private final KafkaTemplate kafkaTemplate;
@@ -57,32 +64,34 @@ public class OrderController {
     @Transactional
     public ResponseEntity<Map<String, String>> placeOrder(
             @Valid @NotNull @RequestBody MakePaymentDTO makePaymentDTO) {
-        // save order to db: OPEN
-        return executeOrder(orderService.saveOrder((PlaceOrderDTO) makePaymentDTO.getOrderDTO()),
+        final Order order = orderService.saveOrder((PlaceOrderDTO) makePaymentDTO.getOrderDTO());
+        Result<Transaction> transaction = makePayment(
                 makePaymentDTO.getTransactionAmount(), makePaymentDTO.getNonce());
+        final Order updatedOrder = executeOrder(OrderType.NEW,
+                                                order,
+                                                transaction);
+        return takeActionPostOrder(updatedOrder, transaction,
+                                   (PlaceOrderDTO) makePaymentDTO.getOrderDTO());
     }
 
     @PostMapping("/renew")
     @Transactional
     public ResponseEntity<Map<String, String>> renewOrder(
             @Valid @NotNull @RequestBody MakePaymentDTO makePaymentDTO) {
-        return executeOrder(orderService.renewOrder((RenewOrderDTO) makePaymentDTO.getOrderDTO()),
+        final Order order = orderService.renewOrder((RenewOrderDTO) makePaymentDTO.getOrderDTO());
+        Result<Transaction> transaction = makePayment(
                 makePaymentDTO.getTransactionAmount(), makePaymentDTO.getNonce());
+        final Order updatedOrder = executeOrder(OrderType.RENEW,
+                                                order,
+                                                transaction);
+        return takeActionPostOrder(updatedOrder, transaction,
+                                   (RenewOrderDTO) makePaymentDTO.getOrderDTO());
     }
 
     @org.jetbrains.annotations.NotNull
-    private ResponseEntity<Map<String, String>> executeOrder(Order createdOrder,
-            BigDecimal transactionAmount, String nonce) {
-        // save order to db: OPEN
-        // make payment call
-        TransactionRequest request = new TransactionRequest()
-                .amount(transactionAmount)
-                .paymentMethodNonce(nonce)
-                .options()
-                .storeInVault(true)
-                .submitForSettlement(true)
-                .done();
-        Result<Transaction> transaction = braintreeGateway.transaction().sale(request);
+    private Order executeOrder(
+            OrderType orderType, Order createdOrder,
+            Result<Transaction> transaction) {
 
         // persistent transaction
         com.austinhub.apiservice.model.po.Transaction createdTransaction = getTransaction(
@@ -90,18 +99,41 @@ public class OrderController {
                 transaction);
         this.transactionService.saveTransaction(createdTransaction);
 
-        if (createdTransaction.getStatus().equals(Status.SETTLED) || createdTransaction.getStatus()
-                .equals(Status.SUBMITTED_FOR_SETTLEMENT)) {
+        Status status = createdTransaction.getStatus();
+        if (status.equals(Status.SETTLED)
+                || com.austinhub.apiservice.model.po.Transaction.IN_PROGRESS_STATUS
+                .contains(status)) {
             createdOrder.setStatus(OrderStatus.COMPLETED);
-        } else {
+        } else if (com.austinhub.apiservice.model.po.Transaction.DECLINED_STATUS.contains(status)) {
             createdOrder.setStatus(OrderStatus.DECLINED);
         }
         this.orderService.updateOrder(createdOrder);
+        return createdOrder;
+    }
 
+    @org.jetbrains.annotations.NotNull
+    private ResponseEntity<Map<String, String>> takeActionPostOrder(Order createdOrder,
+            Result<Transaction> transaction, OrderDTO orderDTO) {
         if (OrderStatus.COMPLETED.equals(createdOrder.getStatus())) {
+            // if renew order, extend expiration time
+            if (orderDTO.getOrderType().equals(OrderType.RENEW)) {
+                RenewOrderDTO renewOrderDTO = (RenewOrderDTO) orderDTO;
+                if (!renewOrderDTO.getOrderItems().isEmpty()) {
+                    renewOrderDTO.getOrderItems().forEach(orderItem -> {
+                        if (orderItem.getItemType().equals(ItemType.MEMBERSHIP)) {
+                            this.membershipService.extendExpiration(orderItem);
+                        } else {
+                            this.resourceService.extendExpiration(orderItem);
+                        }
+                    });
+                }
+            }
+
+            // Send email
             final String accountEmail = createdOrder.getAccount().getEmail();
             kafkaTemplate.send("email", mailService.constructOrderConfirmationEmail(accountEmail,
-                    createdOrder.getOrderNumber()));
+                                                                                    createdOrder
+                                                                                            .getOrderNumber()));
             return ResponseEntity.ok(
                     ImmutableMap.of(
                             "message", "Order placed!",
@@ -111,8 +143,20 @@ public class OrderController {
         } else {
             // specify err
             return ResponseEntity.badRequest()
-                    .body(ImmutableMap.of("message", transaction.getMessage()));
+                                 .body(ImmutableMap.of("message", transaction.getMessage()));
         }
+    }
+
+    private Result<Transaction> makePayment(BigDecimal transactionAmount, String nonce) {
+        // make payment call
+        TransactionRequest request = new TransactionRequest()
+                .amount(transactionAmount)
+                .paymentMethodNonce(nonce)
+                .options()
+                .storeInVault(true)
+                .submitForSettlement(true)
+                .done();
+        return braintreeGateway.transaction().sale(request);
     }
 
     private com.austinhub.apiservice.model.po.Transaction getTransaction(Order createdOrder,
@@ -127,16 +171,23 @@ public class OrderController {
         final Status status = transaction.getTarget().getStatus();
         com.austinhub.apiservice.model.po.Transaction createdTransaction = transactionService
                 .saveTransaction(com.austinhub.apiservice.model.po.Transaction.builder()
-                        .orderId(createdOrder.getId())
-                        .amount(settledTransactionAmount)
-                        .createdTimestamp(createdTimestamp)
-                        .expiryTime(ApplicationUtils
-                                .calculateTransactionExpirationTimestamp(1, createdTimestamp))
-                        .type(transactionType)
-                        .externalId(transactionId)
-                        .merchantId(merchantId)
-                        .status(status)
-                        .build());
+                                                                              .orderId(createdOrder
+                                                                                               .getId())
+                                                                              .amount(settledTransactionAmount)
+                                                                              .createdTimestamp(
+                                                                                      createdTimestamp)
+                                                                              .expiryTime(
+                                                                                      ApplicationUtils
+                                                                                              .calculateTransactionExpirationTimestamp(
+                                                                                                      1,
+                                                                                                      createdTimestamp))
+                                                                              .type(transactionType)
+                                                                              .externalId(
+                                                                                      transactionId)
+                                                                              .merchantId(
+                                                                                      merchantId)
+                                                                              .status(status)
+                                                                              .build());
         return createdTransaction;
     }
 }

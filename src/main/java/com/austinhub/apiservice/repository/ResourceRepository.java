@@ -21,9 +21,11 @@ public interface ResourceRepository extends JpaRepository<Resource, Integer> {
             @Param("isArchived") Boolean isArchived);
 
     @Query(value =
-            "select CASE WHEN COUNT(*) > 0 THEN 'true' ELSE 'false' END from resource "
-                    + "where accountId = :accountId and CAST(expirationTimestamp "
-                    + "as date) = CAST(:expirationTime as date)",
+            "select CASE WHEN COUNT(*) > 0 THEN 'true' ELSE 'false' END from resource r "
+                    + "inner join resource_order ro on r.id = ro.resourceId "
+                    + "inner join `order` o on o.id = ro.orderId "
+                    + "where r.accountId = :accountId and CAST(expirationTimestamp "
+                    + "as date) = CAST(:expirationTime as date) and o.status = 'COMPLETED'",
             nativeQuery = true)
     boolean existsUnexpiredResource(@Param("accountId") Integer accountId, @Param(
             "expirationTime") Date expirationTime);

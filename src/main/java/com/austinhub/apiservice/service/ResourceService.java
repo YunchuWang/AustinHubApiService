@@ -50,11 +50,19 @@ public class ResourceService {
                     String.format("No resource found with id %d", renewOrderItemDTO.getItemId()));
         }
 
-        // update resource order and expiration time
+        resource.getOrders().add(order);
+        resourceRepository.save(resource);
+    }
+
+    public void extendExpiration(RenewOrderItemDTO renewOrderItemDTO) {
+        final Resource resource = resourceRepository.getOne(renewOrderItemDTO.getItemId());
+        if (resource == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    String.format("No resource found with id %d", renewOrderItemDTO.getItemId()));
+        }
         resource.setExpirationTimestamp(ApplicationUtils
                 .calculateOrderItemExpirationTimestamp(renewOrderItemDTO.getPricingPlan(),
                         resource.getExpirationTimestamp()));
-        resource.getOrders().add(order);
 
         resourceRepository.save(resource);
     }

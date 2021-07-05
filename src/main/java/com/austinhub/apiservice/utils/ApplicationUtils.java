@@ -24,12 +24,4 @@ public class ApplicationUtils {
         cal.add(type, length);
         return new Timestamp(cal.getTime().getTime());
     }
-
-    public static java.sql.Timestamp parseTimestamp(String timestamp) {
-        try {
-            return new Timestamp(DATE_TIME_FORMAT.parse(timestamp).getTime());
-        } catch (ParseException e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
 }

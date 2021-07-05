@@ -1,6 +1,20 @@
 package com.austinhub.apiservice.model.po;
 
+import static com.braintreegateway.Transaction.Status.AUTHORIZATION_EXPIRED;
+import static com.braintreegateway.Transaction.Status.AUTHORIZING;
+import static com.braintreegateway.Transaction.Status.FAILED;
+import static com.braintreegateway.Transaction.Status.GATEWAY_REJECTED;
+import static com.braintreegateway.Transaction.Status.PROCESSOR_DECLINED;
+import static com.braintreegateway.Transaction.Status.SETTLEMENT_DECLINED;
+import static com.braintreegateway.Transaction.Status.SETTLING;
+import static com.braintreegateway.Transaction.Status.SUBMITTED_FOR_SETTLEMENT;
+import static com.braintreegateway.Transaction.Status.UNRECOGNIZED;
+import static com.braintreegateway.Transaction.Status.VOIDED;
+
+import com.braintreegateway.Transaction.Status;
+import com.google.common.collect.ImmutableSet;
 import java.math.BigDecimal;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -21,6 +35,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Transaction {
+
+    public static final Set<Status> DECLINED_STATUS = ImmutableSet
+            .of(AUTHORIZATION_EXPIRED, FAILED, GATEWAY_REJECTED, PROCESSOR_DECLINED,
+                    SETTLEMENT_DECLINED, UNRECOGNIZED, VOIDED);
+
+    public static final Set<Status> IN_PROGRESS_STATUS = ImmutableSet
+            .of(AUTHORIZING, SETTLING, SUBMITTED_FOR_SETTLEMENT);
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -51,5 +73,4 @@ public class Transaction {
 
     @Column(name = "merchantId")
     private String merchantId;
-
 }

@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 @Data
 @DisallowConcurrentExecution
 public class ExpirationEmailReminderJob implements Job {
+
     @Autowired
     private MembershipRepository membershipRepository;
     @Autowired
@@ -56,9 +57,10 @@ public class ExpirationEmailReminderJob implements Job {
         accounts.forEach(account -> {
             // find its unexpired membership or resources expiring soon
             boolean hasMembershipExpiring = membershipRepository
-                    .existsUnAutoScribedAndUnexpiredMembership(account.getId(), expirationTime);
-            boolean hasResourceExpiring = resourceRepository.existsUnexpiredResource(account.getId(),
-                    expirationTime);
+                    .existsUnexpiredMembership(account.getId(), expirationTime);
+            boolean hasResourceExpiring = resourceRepository
+                    .existsUnexpiredResource(account.getId(),
+                                             expirationTime);
             if (hasMembershipExpiring || hasResourceExpiring) {
                 sendRenewReminderEmail(account, hasMembershipExpiring, hasResourceExpiring);
             }
@@ -70,7 +72,7 @@ public class ExpirationEmailReminderJob implements Job {
     private void sendRenewReminderEmail(final Account account, final boolean hasMembershipExpiring,
             final boolean hasResourceExpiring) {
         StringBuilder renewalEmailTitle = createRenewEmailTitle(hasMembershipExpiring,
-                hasResourceExpiring);
+                                                                hasResourceExpiring);
 
         // Construct email
         EmailDTO emailDTO =
@@ -78,8 +80,9 @@ public class ExpirationEmailReminderJob implements Job {
                         .to(List.of(account.getEmail()))
                         .subject(renewalEmailTitle.toString())
                         .text(String.format("Hi %s, \nThis is a reminder that %s \n"
-                                        + "Please log in to renew them.",
-                                account.getUsername(), renewalEmailTitle.toString())).build();
+                                                    + "Please log in to renew them.",
+                                            account.getUsername(), renewalEmailTitle.toString()))
+                        .build();
 
         // Send reminder email to the account email
         kafkaTemplate.send("email", emailDTO);
