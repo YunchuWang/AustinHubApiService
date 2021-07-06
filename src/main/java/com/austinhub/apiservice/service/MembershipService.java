@@ -13,8 +13,6 @@ import com.austinhub.apiservice.model.po.Account;
 import com.austinhub.apiservice.model.po.Membership;
 import com.austinhub.apiservice.model.po.MembershipType;
 import com.austinhub.apiservice.model.po.Order;
-import com.austinhub.apiservice.model.po.Resource;
-import com.austinhub.apiservice.model.po.ResourceType;
 import com.austinhub.apiservice.repository.MembershipRepository;
 import com.austinhub.apiservice.repository.MembershipTypeRepository;
 import com.austinhub.apiservice.utils.ApplicationUtils;
@@ -47,9 +45,13 @@ public class MembershipService implements IOrderItemService {
         return membershipTypes
                 .stream()
                 .map(membershipType -> membershipType.toDto(resourceLimits.stream()
-                        .filter(resourceLimit -> resourceLimit.getMembershipName()
-                                .equals(membershipType.getName())).collect(
-                                Collectors.toList())))
+                                                                          .filter(resourceLimit -> resourceLimit
+                                                                                  .getMembershipName()
+                                                                                  .equals(membershipType
+                                                                                                  .getName()))
+                                                                          .collect(
+                                                                                  Collectors
+                                                                                          .toList())))
                 .collect(Collectors.toList());
     }
 
@@ -62,21 +64,23 @@ public class MembershipService implements IOrderItemService {
                 .findMembershipTypeByName(createMembershipDTO.getMembershipType().getType());
         Membership savedMembership = membershipRepository
                 .save(Membership.builder()
-                        .membershipType(membershipType)
-                        .account(account)
-                        .isArchived(false)
-                        .autoSubscribed(createMembershipDTO.isAutoSubscribed())
-                        .createdTimestamp(createdTimestamp)
-                        .expirationTimestamp(ApplicationUtils
-                                .calculateOrderItemExpirationTimestamp(
-                                        placeOrderItemDTO.getPricingPlan(),
-                                        createdTimestamp))
-                        .orders(Set.of(order))
-                        .build());
+                                .membershipType(membershipType)
+                                .account(account)
+                                .isArchived(false)
+                                .autoSubscribed(createMembershipDTO.isAutoSubscribed())
+                                .createdTimestamp(createdTimestamp)
+                                .expirationTimestamp(ApplicationUtils
+                                                             .calculateOrderItemExpirationTimestamp(
+                                                                     placeOrderItemDTO
+                                                                             .getPricingPlan(),
+                                                                     createdTimestamp))
+                                .orders(Set.of(order))
+                                .build());
         for (PlaceOrderItemDTO resourceItem : createMembershipDTO.getResourceItems()) {
             IOrderItemService orderItemSaveService = this.getOrderItemSaveService(resourceItem);
             orderItemSaveService.save(resourceItem, account, createdTimestamp, order,
-                    savedMembership.getId(), resourceItem.getItemType().name().toLowerCase());
+                                      savedMembership.getId(),
+                                      resourceItem.getItemType().name().toLowerCase());
         }
     }
 
@@ -85,7 +89,8 @@ public class MembershipService implements IOrderItemService {
                 membershipRepository.getOne(renewOrderItemDTO.getItemId());
         if (membership == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    String.format("No membership found with id %d", renewOrderItemDTO.getItemId()));
+                                              String.format("No membership found with id %d",
+                                                            renewOrderItemDTO.getItemId()));
         }
 
         // update resource order and expiration time
@@ -101,14 +106,17 @@ public class MembershipService implements IOrderItemService {
         final Membership membership =
                 membershipRepository.getOne(renewOrderItemDTO.getItemId());
 
+        // find out baseline expiration time: now or expiration ts whichever later
         // update resource order and expiration time
-        membership.setExpirationTimestamp(ApplicationUtils
-                .calculateOrderItemExpirationTimestamp(renewOrderItemDTO.getPricingPlan(),
-                        membership.getExpirationTimestamp()));
+        Date expirationTimestamp = membership.getExpirationTimestamp().before(new Date()) ?
+                new Date() : membership.getExpirationTimestamp();
+        membership.setExpirationTimestamp(ApplicationUtils.calculateOrderItemExpirationTimestamp(
+                                                          renewOrderItemDTO.getPricingPlan(),
+                                                          expirationTimestamp));
 
         membershipRepository.save(membership);
     }
-    
+
     public IOrderItemService getOrderItemSaveService(PlaceOrderItemDTO placeOrderItemDTO) {
         if (placeOrderItemDTO instanceof CreateAdsDTO) {
             return adsService;

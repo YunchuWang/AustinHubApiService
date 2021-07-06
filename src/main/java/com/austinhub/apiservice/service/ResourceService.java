@@ -10,6 +10,7 @@ import com.austinhub.apiservice.repository.AccountRepository;
 import com.austinhub.apiservice.repository.ResourceRepository;
 import com.austinhub.apiservice.repository.ResourceTypeRepository;
 import com.austinhub.apiservice.utils.ApplicationUtils;
+import java.util.Date;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -47,7 +48,8 @@ public class ResourceService {
         final Resource resource = resourceRepository.getOne(renewOrderItemDTO.getItemId());
         if (resource == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    String.format("No resource found with id %d", renewOrderItemDTO.getItemId()));
+                                              String.format("No resource found with id %d",
+                                                            renewOrderItemDTO.getItemId()));
         }
 
         resource.getOrders().add(order);
@@ -56,13 +58,12 @@ public class ResourceService {
 
     public void extendExpiration(RenewOrderItemDTO renewOrderItemDTO) {
         final Resource resource = resourceRepository.getOne(renewOrderItemDTO.getItemId());
-        if (resource == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    String.format("No resource found with id %d", renewOrderItemDTO.getItemId()));
-        }
+        Date expirationTimestamp = resource.getExpirationTimestamp().before(new Date()) ?
+                new Date() : resource.getExpirationTimestamp();
         resource.setExpirationTimestamp(ApplicationUtils
-                .calculateOrderItemExpirationTimestamp(renewOrderItemDTO.getPricingPlan(),
-                        resource.getExpirationTimestamp()));
+                                                .calculateOrderItemExpirationTimestamp(
+                                                        renewOrderItemDTO.getPricingPlan(),
+                                                        expirationTimestamp));
 
         resourceRepository.save(resource);
     }
