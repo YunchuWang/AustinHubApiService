@@ -36,16 +36,15 @@ public interface ResourceRepository extends JpaRepository<Resource, Integer> {
             + "inner join resource_order on r.id = resource_order.resourceId "
             + "inner join `order` o on resource_order.orderId = o.id "
             + "where o.status = 'COMPLETED' and r.accountId = "
-            + ":accountId and r.isArchived = false and DATE(r.expirationTimestamp) >= DATE(NOW()) "
-            + "group by r.id)"
+            + ":accountId "
+            + "group by r.id) "
             + "union "
             + "(select m.id as id, m.expirationTimestamp as expirationTime, membership_type.name "
             + "as name, 'membership' as type, '' as category from membership m "
             + "inner join membership_type on m.membershipTypeId = membership_type.id "
             + "inner join membership_order on membership_order.membershipId = m.id "
             + "inner join `order` o on membership_order.orderId = o.id "
-            + "where o.status = 'COMPLETED' and m.accountId = :accountId and DATE(m"
-            + ".expirationTimestamp) >= DATE(NOW()) "
+            + "where o.status = 'COMPLETED' and m.accountId = :accountId "
             + "group by m.id)",
             nativeQuery = true)
     List<RenewableItemDTO> getRenewableItems(@Param("accountId") Integer accountId);

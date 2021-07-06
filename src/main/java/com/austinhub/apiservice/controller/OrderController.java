@@ -71,7 +71,7 @@ public class OrderController {
                                                 order,
                                                 transaction);
         return takeActionPostOrder(updatedOrder, transaction,
-                                   (PlaceOrderDTO) makePaymentDTO.getOrderDTO());
+                                   makePaymentDTO.getOrderDTO());
     }
 
     @PostMapping("/renew")
@@ -85,7 +85,7 @@ public class OrderController {
                                                 order,
                                                 transaction);
         return takeActionPostOrder(updatedOrder, transaction,
-                                   (RenewOrderDTO) makePaymentDTO.getOrderDTO());
+                                   makePaymentDTO.getOrderDTO());
     }
 
     @org.jetbrains.annotations.NotNull
