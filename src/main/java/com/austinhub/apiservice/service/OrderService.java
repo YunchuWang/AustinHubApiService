@@ -41,11 +41,11 @@ public class OrderService {
         // get account
         final Account account = accountRepository.findByUsername(placeOrderDto.getAccountName());
         final Order order = Order.builder()
-                .account(account)
-                .orderNumber(UUID.randomUUID().toString())
-                .price(placeOrderDto.getPrice())
-                .status(OrderStatus.REQUESTED)
-                .build();
+                                 .account(account)
+                                 .orderNumber(UUID.randomUUID().toString().replaceAll("-", ""))
+                                 .price(placeOrderDto.getPrice())
+                                 .status(OrderStatus.REQUESTED)
+                                 .build();
         final Order createdOrder = orderRepository.save(order);
         final Date orderCreatedTimestamp = createdOrder.getCreatedTimestamp();
         final int orderId = createdOrder.getId();
@@ -56,7 +56,7 @@ public class OrderService {
                     placeOrderItemDTO);
             orderItemSaveService
                     .save(placeOrderItemDTO, account, orderCreatedTimestamp, order,
-                            null, placeOrderItemDTO.getItemType().name().toLowerCase());
+                          null, placeOrderItemDTO.getItemType().name().toLowerCase());
         }
 
         return createdOrder;
@@ -67,11 +67,11 @@ public class OrderService {
         // get account
         final Account account = accountRepository.findByUsername(renewOrderDTO.getAccountName());
         final Order order = Order.builder()
-                .account(account)
-                .orderNumber(UUID.randomUUID().toString())
-                .price(renewOrderDTO.getPrice())
-                .status(OrderStatus.REQUESTED)
-                .build();
+                                 .account(account)
+                                 .orderNumber(UUID.randomUUID().toString().replaceAll("-", ""))
+                                 .price(renewOrderDTO.getPrice())
+                                 .status(OrderStatus.REQUESTED)
+                                 .build();
         final Order createdOrder = orderRepository.save(order);
 
         // only this part diff from place order, item already exists just need update
