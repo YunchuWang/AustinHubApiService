@@ -10,12 +10,15 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
 @AllArgsConstructor(onConstructor = @__(@Autowired))
+@CacheConfig(cacheNames = {"category"})
 public class CategoryService {
 
     @PersistenceContext
@@ -44,10 +47,12 @@ public class CategoryService {
 //        .on(qCategoryRelation.subcategoryId.eq(qSubcategory.id)).fetch();
 //  }
 
+    @Cacheable(key = "{#categoryType.toString()}")
     public List<Category> findCategoriesByType(CategoryType categoryType) {
         return categoryRepository.findByCategoryType(categoryType);
     }
 
+    @Cacheable(key = "{#name, #type.toString()}")
     public Category findCategory(String name, @Valid @NotNull CategoryType type) {
         return categoryRepository.findByNameAndCategoryType(name, type);
     }

@@ -24,6 +24,9 @@ import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,12 +34,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 @NoArgsConstructor
+@CacheConfig(cacheNames = {"job"})
 public class JobsService implements IOrderItemService {
 
     private JobRepository jobRepository;
     private CategoryRepository categoryRepository;
     private ResourceTypeRepository resourceTypeRepository;
 
+    @Cacheable(key="{#categoryId, #page, #pageSize, #query, #orderBy.toString()}")
     public PageList<Job> findByCategory(
             int categoryId,
             int page,
@@ -91,14 +96,12 @@ public class JobsService implements IOrderItemService {
         jobRepository.save(job);
     }
 
-    public void renew(RenewOrderItemDTO renewOrderItemDTO, Order order) {
-        
-    }
-
+    @Cacheable(key="{#accountName, #isArchived}")
     public List<MyJobDTO> findOwnsJobs(String accountName, Boolean isArchived) {
         return jobRepository.findByAccountNameAndArchived(accountName, isArchived);
     }
 
+    @CacheEvict(key="#updates.getId()", beforeInvocation = true)
     public void updateJob(UpdateJobRequest updates) {
         // Get existing ads
         Job job = jobRepository.getOne((updates.getId()));

@@ -9,6 +9,9 @@ import com.austinhub.apiservice.utils.GsonUtils;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@CacheConfig(cacheNames = {"Ads"})
 @RestController
 @Validated
 @RequestMapping("/compaigns")
@@ -29,20 +33,22 @@ public class AdsController {
         this.adsService = adsService;
     }
 
+    @Cacheable(key = "'all'")
     @GetMapping
     public ResponseEntity<List<Ads>> findAllAds() {
         return ResponseEntity.ok().body(adsService.findAllAds());
     }
 
+    @Cacheable(key="{#accountName, #isArchived}")
     @GetMapping ("/owned")
     public ResponseEntity<List<MyAdsDTO>> findOwnedAds(@Valid @NotNull @RequestParam String accountName,
             @Valid @NotNull @RequestParam Boolean isArchived) {
         return ResponseEntity.ok().body(adsService.findOwnsAds(accountName, isArchived));
     }
 
+    @CacheEvict(key="#updates.getId()", beforeInvocation = true)
     @PutMapping
     public ResponseEntity<String> updateAds(@Valid @RequestBody UpdateAdsRequest updates) {
-        System.out.println(updates.toString());
         adsService.updateAds(updates);
         return ResponseEntity.ok(GsonUtils.getGson().toJson("updated"));
     }

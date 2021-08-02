@@ -14,6 +14,9 @@ import com.austinhub.apiservice.utils.GsonUtils;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,31 +32,33 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/booths")
 public class BoothController {
 
-  private final BoothService boothService;
-  private final CategoryService categoryService;
+    private final BoothService boothService;
+    private final CategoryService categoryService;
 
-  public BoothController(BoothService boothService,
-          CategoryService categoryService) {
-    this.boothService = boothService;
-    this.categoryService = categoryService;
-  }
+    public BoothController(BoothService boothService,
+            CategoryService categoryService) {
+        this.boothService = boothService;
+        this.categoryService = categoryService;
+    }
+    
+    @GetMapping
+    public ResponseEntity<PageList<Booth>> findBoothsByCategory(
+            @Valid @NotNull @RequestParam String name,
+            @Valid @NotNull @RequestParam CategoryType type,
+            @Valid @NotNull @RequestParam(defaultValue = "0") int page,
+            @Valid @NotNull @RequestParam int pageSize,
+            @Valid @NotNull @RequestParam(defaultValue = "") String query,
+            @Valid @NotNull @RequestParam(defaultValue = "TITLE") OrderBy orderBy
+    ) {
+        Category category = categoryService.findCategory(name, type);
+        final PageList<Booth> booths = boothService
+                .findByCategory(category.getId(), page, pageSize, query, orderBy);
+        return ResponseEntity.ok().body(booths);
+    }
 
-  @GetMapping
-  public ResponseEntity<PageList<Booth>> findBoothsByCategory(
-      @Valid @NotNull @RequestParam String name,
-      @Valid @NotNull @RequestParam CategoryType type,
-      @Valid @NotNull @RequestParam(defaultValue = "0") int page,
-      @Valid @NotNull @RequestParam int pageSize,
-      @Valid @NotNull @RequestParam(defaultValue = "") String query,
-      @Valid @NotNull @RequestParam(defaultValue = "TITLE") OrderBy orderBy
-  ) {
-    Category category = categoryService.findCategory(name, type);
-    final PageList<Booth> booths = boothService.findByCategory(category.getId(), page, pageSize, query, orderBy);
-    return ResponseEntity.ok().body(booths);
-  }
-
-    @GetMapping ("/owned")
-    public ResponseEntity<List<MyBoothDTO>> findOwnedBooths(@Valid @NotNull @RequestParam String accountName,
+    @GetMapping("/owned")
+    public ResponseEntity<List<MyBoothDTO>> findOwnedBooths(
+            @Valid @NotNull @RequestParam String accountName,
             @Valid @NotNull @RequestParam Boolean isArchived) {
         return ResponseEntity.ok().body(boothService.findOwnsBooths(accountName, isArchived));
     }
@@ -66,7 +71,6 @@ public class BoothController {
 
     @PutMapping
     public ResponseEntity<String> updateBooth(@Valid @RequestBody UpdateBoothRequest updates) {
-        System.out.println(updates.toString());
         boothService.updateBooth(updates);
         return ResponseEntity.ok(GsonUtils.getGson().toJson("updated"));
     }

@@ -13,6 +13,7 @@ import static com.braintreegateway.Transaction.Status.VOIDED;
 
 import com.braintreegateway.Transaction.Status;
 import com.google.common.collect.ImmutableSet;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Set;
 import javax.persistence.Column;
@@ -34,7 +35,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Transaction {
+public class Transaction implements Serializable {
 
     public static final Set<Status> DECLINED_STATUS = ImmutableSet
             .of(AUTHORIZATION_EXPIRED, FAILED, GATEWAY_REJECTED, PROCESSOR_DECLINED,

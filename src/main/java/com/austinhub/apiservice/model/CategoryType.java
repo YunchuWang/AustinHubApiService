@@ -1,5 +1,7 @@
 package com.austinhub.apiservice.model;
 
-public enum CategoryType {
+import java.io.Serializable;
+
+public enum CategoryType implements Serializable {
     RESC, ACCT
 }

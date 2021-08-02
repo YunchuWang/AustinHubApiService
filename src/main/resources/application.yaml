@@ -19,7 +19,11 @@ spring:
       enabled: true
   quartz:
     job-store-type: memory
-
+  redis:
+    database: 0
+    host: localhost
+    port: 6379
+    timeout: 60000
       
 support:
   email: austinhubhuaren@gmail.com

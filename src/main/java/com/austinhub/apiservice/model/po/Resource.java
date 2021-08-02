@@ -1,5 +1,6 @@
 package com.austinhub.apiservice.model.po;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
 import javax.persistence.Column;
@@ -28,7 +29,7 @@ import org.hibernate.annotations.CreationTimestamp;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Resource {
+public class Resource implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -58,7 +59,7 @@ public class Resource {
     @Column(name = "createdTimestamp")
     private Date createdTimestamp;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "resource_order",
             joinColumns = @JoinColumn(name = "resourceId"),

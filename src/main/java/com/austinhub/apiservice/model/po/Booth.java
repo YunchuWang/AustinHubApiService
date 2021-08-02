@@ -31,7 +31,7 @@ public class Booth implements Serializable {
 	private Integer id;
 
    	// TODO: hide account private info?
-	@OneToOne
+	@OneToOne(fetch = FetchType.EAGER)
 	@MapsId
 	@JoinColumn(name = "resourceId", referencedColumnName = "id")
 	private Resource resource;

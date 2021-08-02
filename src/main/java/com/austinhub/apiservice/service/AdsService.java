@@ -22,6 +22,9 @@ import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,16 +32,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 @NoArgsConstructor
+@CacheConfig(cacheNames = {"ads"})
 public class AdsService implements IOrderItemService {
 
     private AdsRepository adsRepository;
     private CategoryRepository categoryRepository;
     private ResourceTypeRepository resourceTypeRepository;
 
+    @Cacheable(key="'all'")
     public List<Ads> findAllAds() {
         return adsRepository.findAll();
     }
 
+    @Cacheable(key="{#accountName, #isArchived}")
     public List<MyAdsDTO> findOwnsAds(String accountName, Boolean isArchived) {
         return adsRepository.findByAccountNameAndArchived(accountName, isArchived);
     }
@@ -47,6 +53,7 @@ public class AdsService implements IOrderItemService {
         adsRepository.saveAll(ads);
     }
 
+    @CacheEvict(key="#updates.getId()", beforeInvocation = true)
     public void updateAds(UpdateAdsRequest updates) {
         // Get existing ads
         Ads ads = adsRepository.getOne((updates.getId()));
@@ -109,9 +116,5 @@ public class AdsService implements IOrderItemService {
                 .build();
 
         adsRepository.save(ads);
-    }
-
-    public void renew(RenewOrderItemDTO renewOrderItemDTO, Order order) {
-        
     }
 }

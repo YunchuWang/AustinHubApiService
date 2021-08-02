@@ -8,7 +8,6 @@ import com.austinhub.apiservice.model.dto.MembershipTypeDTO;
 import com.austinhub.apiservice.model.dto.PlaceOrderItemDTO;
 import com.austinhub.apiservice.model.dto.RenewOrderItemDTO;
 import com.austinhub.apiservice.model.dto.ResourceLimit;
-import com.austinhub.apiservice.model.enums.ItemType;
 import com.austinhub.apiservice.model.po.Account;
 import com.austinhub.apiservice.model.po.Membership;
 import com.austinhub.apiservice.model.po.MembershipType;
@@ -93,10 +92,6 @@ public class MembershipService implements IOrderItemService {
                                                             renewOrderItemDTO.getItemId()));
         }
 
-        // update resource order and expiration time
-//        membership.setExpirationTimestamp(ApplicationUtils
-//                .calculateOrderItemExpirationTimestamp(renewOrderItemDTO.getPricingPlan(),
-//                        membership.getExpirationTimestamp()));
         membership.getOrders().add(order);
 
         membershipRepository.save(membership);
@@ -111,8 +106,8 @@ public class MembershipService implements IOrderItemService {
         Date expirationTimestamp = membership.getExpirationTimestamp().before(new Date()) ?
                 new Date() : membership.getExpirationTimestamp();
         membership.setExpirationTimestamp(ApplicationUtils.calculateOrderItemExpirationTimestamp(
-                                                          renewOrderItemDTO.getPricingPlan(),
-                                                          expirationTimestamp));
+                renewOrderItemDTO.getPricingPlan(),
+                expirationTimestamp));
 
         membershipRepository.save(membership);
     }
@@ -127,21 +122,5 @@ public class MembershipService implements IOrderItemService {
         }
 
         throw new RuntimeException("Invalid order item type!");
-    }
-
-    public IOrderItemService getOrderItemRenewService(RenewOrderItemDTO renewOrderItemDTO) {
-        if (renewOrderItemDTO.getItemType().equals(ItemType.ADS)) {
-            return adsService;
-        } else if (renewOrderItemDTO.getItemType().equals(ItemType.BOOTH)) {
-            return boothService;
-        } else if (renewOrderItemDTO.getItemType().equals(ItemType.JOB)) {
-            return jobsService;
-        }
-
-        throw new RuntimeException("Invalid order item type!");
-    }
-
-    public void renew(Order order, RenewOrderItemDTO renewOrderItemDTO) {
-
     }
 }

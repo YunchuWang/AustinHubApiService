@@ -16,6 +16,8 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,12 +27,14 @@ import org.springframework.web.server.ResponseStatusException;
 @Transactional
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 @NoArgsConstructor
+@CacheConfig(cacheNames = {"resource"})
 public class ResourceService {
 
     private ResourceTypeRepository resourceTypeRepository;
     private ResourceRepository resourceRepository;
     private AccountRepository accountRepository;
 
+    @Cacheable(key="'all'")
     public List<ResourceType> findAllResourceTypes() {
         return resourceTypeRepository.findAll();
     }
