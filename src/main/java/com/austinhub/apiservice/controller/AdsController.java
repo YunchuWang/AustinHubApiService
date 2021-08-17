@@ -1,17 +1,16 @@
 package com.austinhub.apiservice.controller;
 
-import com.austinhub.apiservice.model.dto.SaveAdsRequest;
 import com.austinhub.apiservice.model.dto.MyAdsDTO;
+import com.austinhub.apiservice.model.dto.SaveAdsRequest;
 import com.austinhub.apiservice.model.dto.UpdateAdsRequest;
 import com.austinhub.apiservice.model.po.Ads;
 import com.austinhub.apiservice.service.AdsService;
 import com.austinhub.apiservice.utils.GsonUtils;
+import io.micrometer.core.instrument.Counter;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,35 +26,42 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RequestMapping("/compaigns")
 public class AdsController {
-    private final AdsService adsService;
 
-    public AdsController(AdsService adsService) {
+    private final AdsService adsService;
+    private final Counter visitorCounter;
+
+    public AdsController(AdsService adsService, Counter visitorCounter) {
         this.adsService = adsService;
+        this.visitorCounter = visitorCounter;
+        visitorCounter.increment();
     }
 
-    @Cacheable(key = "'all'")
     @GetMapping
     public ResponseEntity<List<Ads>> findAllAds() {
-        return ResponseEntity.ok().body(adsService.findAllAds());
+        visitorCounter.increment();
+        return ResponseEntity.ok()
+                             .body(adsService.findAllAds());
     }
 
-    @Cacheable(key="{#accountName, #isArchived}")
-    @GetMapping ("/owned")
-    public ResponseEntity<List<MyAdsDTO>> findOwnedAds(@Valid @NotNull @RequestParam String accountName,
+    @GetMapping("/owned")
+    public ResponseEntity<List<MyAdsDTO>> findOwnedAds(
+            @Valid @NotNull @RequestParam String accountName,
             @Valid @NotNull @RequestParam Boolean isArchived) {
-        return ResponseEntity.ok().body(adsService.findOwnsAds(accountName, isArchived));
+        return ResponseEntity.ok()
+                             .body(adsService.findOwnsAds(accountName, isArchived));
     }
 
-    @CacheEvict(key="#updates.getId()", beforeInvocation = true)
     @PutMapping
     public ResponseEntity<String> updateAds(@Valid @RequestBody UpdateAdsRequest updates) {
         adsService.updateAds(updates);
-        return ResponseEntity.ok(GsonUtils.getGson().toJson("updated"));
+        return ResponseEntity.ok(GsonUtils.getGson()
+                                          .toJson("updated"));
     }
 
     @PostMapping
     public ResponseEntity<String> saveAds(@Valid @RequestBody SaveAdsRequest saveAdsRequest) {
         adsService.saveAds(saveAdsRequest.getAds());
-        return ResponseEntity.ok(GsonUtils.getGson().toJson("saved"));
+        return ResponseEntity.ok(GsonUtils.getGson()
+                                          .toJson("saved"));
     }
 }

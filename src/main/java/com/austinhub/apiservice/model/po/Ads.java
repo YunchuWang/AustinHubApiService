@@ -4,6 +4,7 @@ import com.austinhub.apiservice.validator.ExtendedEmailValidator;
 import com.austinhub.apiservice.validator.Mobile;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
+import java.io.Serializable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,7 +28,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Ads {
+public class Ads implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
