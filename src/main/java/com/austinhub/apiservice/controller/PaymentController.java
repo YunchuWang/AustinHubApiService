@@ -25,7 +25,6 @@ public class PaymentController {
 
     private BraintreeGateway braintreeGateway;
 
-
     @PostMapping("/client_token")
     public ResponseEntity<Map<String, String>> getClientToken(
             @RequestBody(required = false) String customerId) {
